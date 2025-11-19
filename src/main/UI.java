@@ -73,6 +73,7 @@ public class UI {
 			y = gp.screenHeight / 2 + (gp.tileSize * 2);
 			g2.drawString(text, x, y);
 			
+			
 			gp.gameThread = null;
 		}
 		else {
