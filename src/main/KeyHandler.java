@@ -47,10 +47,10 @@ public class KeyHandler implements KeyListener{
                     if(gp.ui.commandNum == 0) {
                         gp.ui.titleScreenState = 1;
                     }
-                    if(gp.ui.command == 1) {
+                    if(gp.ui.commandNum == 1) {
                         // add later
                     }
-                    if(gp.ui.command == 2) {
+                    if(gp.ui.commandNum == 2) {
                         System.exit(0);
                     }
                 }
@@ -76,17 +76,17 @@ public class KeyHandler implements KeyListener{
                         gp.gameState = gp.playState;
                         gp.playMusic(0);
                     }
-                    if(gp.ui.command == 1) {
+                    if(gp.ui.commandNum == 1) {
                         System.out.println("Do some Thief specific stuff!");
                         gp.gameState = gp.playState;
                         gp.playMusic(0);
                     }
-                    if(gp.ui.command == 2) {
+                    if(gp.ui.commandNum == 2) {
                         System.out.println("Do some sorcerer specific stuff!");
                         gp.gameState = gp.playState;
                         gp.playMusic(0);
                     }
-                    if(gp.ui.command == 3) {
+                    if(gp.ui.commandNum == 3) {
                         gp.ui.titleScreenState = 0;
                     }
                 }
