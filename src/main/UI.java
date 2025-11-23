@@ -1,10 +1,10 @@
 package main;
 import entity.Entity;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
@@ -14,7 +14,7 @@ public class UI {
 
 	GamePanel gp;
 	Graphics2D g2;
-	Font arial_40, arial_80B;
+	Font maruMonica;
     BufferedImage heart_full, heart_half, heart_blank;
 	public boolean messageOn = false;
 //	public String message = "";
@@ -30,10 +30,16 @@ public class UI {
 
 	public UI(GamePanel gp) {
 		this.gp = gp;
-		
-		//INSTANTIATING 
-		arial_40 = new Font("Arial", Font.PLAIN, 40);
-		arial_80B = new Font("Arial", Font.BOLD, 80);
+
+        InputStream is = getClass().getResourceAsStream("/font/x12y16pxMaruMonica.ttf");
+        try {
+            maruMonica = Font.createFont(Font.TRUETYPE_FONT, is);
+        } catch (FontFormatException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         //CREATE HUD OBJECT
         Entity heart = new OBJ_Heart(gp);
@@ -52,7 +58,7 @@ public class UI {
 		
 		this.g2 = g2;
 		
-		g2.setFont(arial_40);
+		g2.setFont(maruMonica);
 		g2.setColor(Color.white);
 
         //TITLE STATE
@@ -254,7 +260,7 @@ public class UI {
 		
 		drawSubWindow(x, y, width, height);
 		
-		g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 28F));
+		g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 32F));
 		x += gp.tileSize;
 		y += gp.tileSize;
 		
