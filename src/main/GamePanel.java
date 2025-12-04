@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,9 +90,22 @@ public class GamePanel extends JPanel implements Runnable {
         aSetter.setInteractiveTile();
         // playMusic(0);
         gameState = titleState;
+
         tempScreen = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_ARGB);
         g2 = (Graphics2D) tempScreen.getGraphics();
 
+        setFullScreen();
+    }
+
+    public void setFullScreen() {
+        // get local screen size
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        gd.setFullScreenWindow(Main.window);
+
+        // get full screen width and height
+        screenWidth2 = Main.window.getWidth();
+        screenHeight2 = Main.window.getHeight();
     }
 
     public void startGameThread() {
@@ -158,6 +173,7 @@ public class GamePanel extends JPanel implements Runnable {
 
             if (delta >= 1) {
                 update();
+                // repaint();
                 drawToTempScreen();
                 drawToScreen();
                 delta--;
@@ -233,6 +249,10 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void drawToTempScreen() {
+        // clear screen
+        g2.setColor(Color.black);
+        g2.fillRect(0, 0, screenWidth, screenHeight);
+
         // DEBUG
         long drawStart = 0;
         if (keyH.checkDrawTime == true) {
