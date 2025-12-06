@@ -157,6 +157,17 @@ public class KeyHandler implements KeyListener {
                 checkDrawTime = false;
             }
         }
+        if (code == KeyEvent.VK_R) {
+            switch (gp.currentMap) {
+                case 0:
+                    gp.tileM.loadMap("/maps/worldV3.txt", 0);
+                    break;
+                case 1:
+                    gp.tileM.loadMap("/maps/interior01.txt", 1);
+                    break;
+            }
+
+        }
     }
 
     public void pauseState(int code) {
@@ -290,6 +301,7 @@ public class KeyHandler implements KeyListener {
             if (gp.ui.commandNum == 0) {
                 gp.gameState = gp.playState;
                 gp.retry();
+                gp.playMusic(0);
             } else if (gp.ui.commandNum == 1) {
                 gp.ui.titleScreenState = 0;
                 gp.gameState = gp.titleState;

@@ -15,17 +15,18 @@ public class TileManager {
 
     GamePanel gp;
     public Tile[] tile;
-    public int mapTileNum[][];
+    public int mapTileNum[][][];
 
     public TileManager(GamePanel gp) {
 
         this.gp = gp;
 
         tile = new Tile[50];
-        mapTileNum = new int[gp.maxWorldCol][gp.maxWorldRow];
+        mapTileNum = new int[gp.maxMap][gp.maxWorldCol][gp.maxWorldRow];
 
         getTileImage(); // load resources
-        loadMap("/maps/worldV2.txt"); // load map
+        loadMap("/maps/worldV3.txt", 0); // load map
+        loadMap("/maps/interior01.txt", 1);
     }
 
     public void getTileImage() // load images here
@@ -73,7 +74,9 @@ public class TileManager {
         setup(39, "earth", false);
         setup(40, "wall", true);
         setup(41, "tree", true);
-        // setup(42, "trunk", true);
+        setup(42, "hut", false);
+        setup(43, "floor01", false);
+        setup(44, "table01", true);
     }
 
     public void setup(int index, String imageName, boolean collision) {
@@ -91,7 +94,7 @@ public class TileManager {
         }
     }
 
-    public void loadMap(String filepath) {
+    public void loadMap(String filepath, int map) {
         try {
 
             InputStream is = getClass().getResourceAsStream(filepath);
@@ -110,7 +113,7 @@ public class TileManager {
 
                     int num = Integer.parseInt(numbers[col]);
 
-                    mapTileNum[col][row] = num;
+                    mapTileNum[map][col][row] = num;
                     col++;
                 }
                 if (col == gp.maxWorldCol) {
@@ -133,7 +136,7 @@ public class TileManager {
 
         while (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
 
-            int tileNum = mapTileNum[worldCol][worldRow];
+            int tileNum = mapTileNum[gp.currentMap][worldCol][worldRow];
 
             int worldX = worldCol * gp.tileSize;
             int worldY = worldRow * gp.tileSize;
