@@ -10,11 +10,11 @@ public class OBJ_Axe extends Entity {
 
         type = type_axe;
         name = "Woodcutter's Axe";
-        down1 = setup("/objects/axe",gp.tileSize,gp.tileSize);
+        down1 = setup("/objects/axe", gp.tileSize, gp.tileSize);
         attackValue = 2;
         attackArea.width = 30;
         attackArea.height = 30;
         description = "[Woodcutter's Axe]\nA bit rusty but still \ncan cut some trees";
-
+        price = 75;
     }
 }
