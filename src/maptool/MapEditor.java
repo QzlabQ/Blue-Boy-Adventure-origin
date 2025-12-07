@@ -27,6 +27,7 @@ public class MapEditor extends JFrame {
     private int selectedTile = 0;
     private JButton selectedTileButton;
     private JToggleButton mouseModeButton;
+    private JToggleButton coordsButton;
 
     private String currentMapFile = "res/maps/map.txt";
     private String tilesFolder = "res/tiles/";
@@ -79,7 +80,7 @@ public class MapEditor extends JFrame {
             updateStatus("新建地图文件");
         }
 
-        setTitle("像素游戏地图编辑器 - " + MAP_WIDTH + "x" + MAP_HEIGHT);
+        setTitle("Blue Boy Adventure Map Editor - " + MAP_WIDTH + "x" + MAP_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 800);
         setLocationRelativeTo(null);
@@ -296,8 +297,11 @@ public class MapEditor extends JFrame {
         mapScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         mapScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel toolbar = new JPanel(new BorderLayout());
         toolbar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        JPanel fileToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel optionToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         JButton loadButton = new JButton("加载");
         loadButton.addActionListener(e -> loadMapAction());
@@ -326,7 +330,7 @@ public class MapEditor extends JFrame {
         mapFilePathField = new JTextField(new File(currentMapFile).getName(), 20);
         mapFilePathField.setEditable(false);
 
-        JToggleButton coordsButton = new JToggleButton("坐标");
+        coordsButton = new JToggleButton("坐标");
         coordsButton.setSelected(showCoordinates);
         coordsButton.addActionListener(e -> {
             showCoordinates = coordsButton.isSelected();
@@ -364,20 +368,24 @@ public class MapEditor extends JFrame {
                     JOptionPane.INFORMATION_MESSAGE);
         });
 
-        toolbar.add(new JLabel("地图:"));
-        toolbar.add(mapFilePathField);
-        toolbar.add(newButton);
-        toolbar.add(loadButton);
-        toolbar.add(saveButton);
-        toolbar.add(saveAsButton);
-        toolbar.add(clearButton);
-        toolbar.add(undoButton);
-        toolbar.add(redoButton);
-        toolbar.add(clearSelectButton);
-        toolbar.add(Box.createHorizontalStrut(10));
-        toolbar.add(coordsButton);
-        toolbar.add(mouseModeButton);
-        toolbar.add(helpButton);
+        fileToolbar.add(new JLabel("地图:"));
+        fileToolbar.add(mapFilePathField);
+        fileToolbar.add(newButton);
+        fileToolbar.add(loadButton);
+        fileToolbar.add(saveButton);
+        fileToolbar.add(saveAsButton);
+        fileToolbar.add(clearButton);
+        fileToolbar.add(undoButton);
+        fileToolbar.add(redoButton);
+        fileToolbar.add(clearSelectButton);
+
+        optionToolbar.add(new JLabel("选项:"));
+        optionToolbar.add(coordsButton);
+        optionToolbar.add(mouseModeButton);
+        optionToolbar.add(helpButton);
+
+        toolbar.add(fileToolbar, BorderLayout.NORTH);
+        toolbar.add(optionToolbar, BorderLayout.SOUTH);
 
         leftPanel.add(toolbar, BorderLayout.NORTH);
         leftPanel.add(mapScrollPane, BorderLayout.CENTER);
@@ -738,6 +746,9 @@ public class MapEditor extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showCoordinates = !showCoordinates;
+                if (coordsButton != null) {
+                    coordsButton.setSelected(showCoordinates);
+                }
                 refreshMapDisplay();
                 updateStatus("坐标显示: " + (showCoordinates ? "开启" : "关闭"));
             }
