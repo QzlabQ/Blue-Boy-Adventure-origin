@@ -20,7 +20,7 @@ public class OBJ_Potion_Red extends Entity {
         price = 20;
     }
 
-    public void use(Entity entity) {
+    public boolean use(Entity entity) {
 
         gp.gameState = gp.dialogueState;
         gp.ui.currentDialogue = "You drink the " + name + "!\n"
@@ -30,5 +30,6 @@ public class OBJ_Potion_Red extends Entity {
             gp.player.life = gp.player.maxLife;
         }
         gp.playSE(2);
+        return true;
     }
 }
