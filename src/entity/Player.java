@@ -9,6 +9,7 @@ import main.KeyHandler;
 import object.OBJ_Axe;
 import object.OBJ_Fireball;
 import object.OBJ_Key;
+import object.OBJ_Lantern;
 import object.OBJ_Shield_Wood;
 
 public class Player extends Entity {
@@ -19,6 +20,7 @@ public class Player extends Entity {
     public final int screenY;
     int standCounter = 0;
     public boolean attackCanceled = false;
+    public boolean lightUpdated = false;
 
     public Player(GamePanel gp, KeyHandler keyH) {
 
@@ -94,6 +96,7 @@ public class Player extends Entity {
         inventory.add(currentWeapon);
         inventory.add(currentShield);
         inventory.add(new OBJ_Key(gp));
+        inventory.add(new OBJ_Lantern(gp));
 
     }
 
@@ -495,6 +498,14 @@ public class Player extends Entity {
 
                 currentShield = selectedItem;
                 defense = getDefense();
+            }
+            if (selectedItem.type == type_light) {
+                if (currentLight == selectedItem) {
+                    currentLight = null;
+                } else {
+                    currentLight = selectedItem;
+                }
+                lightUpdated = true;
             }
             if (selectedItem.type == type_consumable) {
 
