@@ -161,6 +161,70 @@ public class MapEditor extends JFrame {
         mapPanel = new JPanel(new GridLayout(MAP_HEIGHT, MAP_WIDTH, 0, 0));
         mapPanel.setPreferredSize(new Dimension(MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE));
 
+        // 添加鼠标监听器到mapPanel来支持滑动绘制
+        mapPanel.addMouseMotionListener(new MouseMotionAdapter() {
+            private Point lastPoint = null;
+            private Rectangle lastArea = null;
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (mouseMode || selectedTile < 0)
+                    return;
+
+                Point mousePos = e.getPoint();
+                Point viewPos = mapScrollPane.getViewport().getViewPosition();
+                int mouseX = mousePos.x + viewPos.x;
+                int mouseY = mousePos.y + viewPos.y;
+
+                // 计算当前鼠标所在的格子
+                int tileX = Math.min(Math.max(mouseX / TILE_SIZE, 0), MAP_WIDTH - 1);
+                int tileY = Math.min(Math.max(mouseY / TILE_SIZE, 0), MAP_HEIGHT - 1);
+
+                // 如果是第一次拖动，保存状态
+                if (lastPoint == null) {
+                    saveCurrentState();
+                    lastPoint = new Point(tileX, tileY);
+
+                    // 设置单个格子
+                    mapData[tileY][tileX] = selectedTile;
+                    tilePanels[tileY][tileX].repaint();
+                    return;
+                }
+
+                // 如果鼠标移到了新的格子
+                if (tileX != lastPoint.x || tileY != lastPoint.y) {
+                    // 计算需要更新的区域
+                    int startX = Math.min(tileX, lastPoint.x);
+                    int endX = Math.max(tileX, lastPoint.x);
+                    int startY = Math.min(tileY, lastPoint.y);
+                    int endY = Math.max(tileY, lastPoint.y);
+
+                    Rectangle currentArea = new Rectangle(startX, startY,
+                            endX - startX + 1, endY - startY + 1);
+
+                    // 如果区域有变化，更新所有格子
+                    if (lastArea == null || !currentArea.equals(lastArea)) {
+                        for (int y = startY; y <= endY; y++) {
+                            for (int x = startX; x <= endX; x++) {
+                                mapData[y][x] = selectedTile;
+                                tilePanels[y][x].repaint();
+                            }
+                        }
+                        lastArea = currentArea;
+                    }
+
+                    lastPoint = new Point(tileX, tileY);
+                }
+
+                updateStatus();
+            }
+
+            public void mouseReleased(MouseEvent e) {
+                lastPoint = null;
+                lastArea = null;
+            }
+        });
+
         for (int y = 0; y < MAP_HEIGHT; y++) {
             for (int x = 0; x < MAP_WIDTH; x++) {
                 final int posX = x;
@@ -218,7 +282,9 @@ public class MapEditor extends JFrame {
                         if (mouseMode || e.getButton() != MouseEvent.BUTTON1) {
                             return;
                         }
-                        saveCurrentState();
+                        if (!e.isControlDown()) { // 按住Ctrl键时不保存状态
+                            saveCurrentState();
+                        }
                     }
 
                     @Override
@@ -254,6 +320,10 @@ public class MapEditor extends JFrame {
                         if (mouseMode) {
                             tilePanel.setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
                             tilePanel.repaint();
+                        } else if (e.isShiftDown() && selectedTile >= 0) {
+                            // Shift键+鼠标移动：连续绘制
+                            mapData[posY][posX] = selectedTile;
+                            tilePanel.repaint();
                         } else {
                             tilePanel.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 2));
                         }
@@ -275,7 +345,9 @@ public class MapEditor extends JFrame {
                             return;
 
                         if (!isDragging) {
-                            saveCurrentState();
+                            if (!e.isControlDown()) { // 按住Ctrl键时不保存状态
+                                saveCurrentState();
+                            }
                             isDragging = true;
                         }
                         mapData[posY][posX] = selectedTile;
@@ -327,6 +399,10 @@ public class MapEditor extends JFrame {
         JButton clearSelectButton = new JButton("取消选择");
         clearSelectButton.addActionListener(e -> clearSelection());
 
+        JToggleButton brushModeButton = new JToggleButton("画笔模式");
+        brushModeButton.setSelected(true);
+        brushModeButton.setEnabled(false);
+
         mapFilePathField = new JTextField(new File(currentMapFile).getName(), 20);
         mapFilePathField.setEditable(false);
 
@@ -346,6 +422,9 @@ public class MapEditor extends JFrame {
                 }
                 selectedTile = -1;
                 selectedTileButton = null;
+                brushModeButton.setSelected(false);
+            } else {
+                brushModeButton.setSelected(true);
             }
             refreshMapDisplay();
             updateStatus();
@@ -357,11 +436,14 @@ public class MapEditor extends JFrame {
                     "操作指南：\n" +
                             "• 左键：放置方块\n" +
                             "• 右键：选择方块\n" +
-                            "• 拖拽：连续绘制\n" +
+                            "• 拖拽：连续绘制（滑动鼠标可批量填充）\n" +
+                            "• Shift+鼠标移动：连续绘制\n" +
+                            "• Ctrl+拖拽：无撤销记录的连续绘制\n" +
                             "• 鼠标模式：查看方块信息\n" +
                             "• 取消选择：退出编辑模式\n" +
                             "• 坐标按钮：显示/隐藏坐标\n" +
                             "• 撤销/重做：Ctrl+Z/Ctrl+Y\n" +
+                            "• ESC：取消选择\n" +
                             "• ID始终显示在方块左上角\n" +
                             "• 碰撞方块有红色标记",
                     "操作指南",
@@ -378,6 +460,7 @@ public class MapEditor extends JFrame {
         fileToolbar.add(undoButton);
         fileToolbar.add(redoButton);
         fileToolbar.add(clearSelectButton);
+        fileToolbar.add(brushModeButton);
 
         optionToolbar.add(new JLabel("选项:"));
         optionToolbar.add(coordsButton);
