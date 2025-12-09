@@ -23,8 +23,13 @@ public class CollisionChecker {
         int entityBottomRow = entityBottomWorldY / gp.tileSize;
 
         int tileNum1, tileNum2;
+        // 先用一个临时方向，击退
+        String direction = entity.direction;
+        if(entity.knockBack == true){
+            direction = entity.knockBackDirection;
+        }
 
-        switch (entity.direction) {
+        switch (direction) {
 
             case "up":
                 entityTopRow = (entityTopWorldY - entity.speed) / gp.tileSize;
@@ -63,6 +68,7 @@ public class CollisionChecker {
                 }
                 break;
         }
+        
 
     }
 
@@ -123,7 +129,11 @@ public class CollisionChecker {
     public int checkEntity(Entity entity, Entity[][] target) {
 
         int index = 999;
-
+        // 先用一个临时方向，击退
+        String direction = entity.direction;
+        if(entity.knockBack == true){
+            direction = entity.knockBackDirection;
+        }
         for (int i = 0; i < target[1].length; i++) {
 
             if (target[gp.currentMap][i] != null) {
@@ -139,7 +149,7 @@ public class CollisionChecker {
                         + target[gp.currentMap][i].solidArea.y; // you can specify the
                 // solid Area in each object with the
                 // latter part
-                switch (entity.direction) {
+                switch (direction) {
                     case "up":
                         entity.solidArea.y -= entity.speed;
                         break;

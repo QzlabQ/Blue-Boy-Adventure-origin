@@ -39,6 +39,7 @@ public class GameMap extends TileManager {
                     row++;
                 }
             }
+            g2.dispose();
         }
     }
 

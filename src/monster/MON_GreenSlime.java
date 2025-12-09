@@ -51,68 +51,18 @@ public class MON_GreenSlime extends Entity {
         right2 = setup("/monster/greenslime_down_2", gp.tileSize, gp.tileSize);
     }
 
-    @Override
-    public void update() {
-        super.update();
-
-        int xDistance = Math.abs(worldX - gp.player.worldX);
-        int yDistance = Math.abs(worldY - gp.player.worldY);
-        int tileDistance = (xDistance + yDistance) / gp.tileSize;
-
-        if (onPath == false && tileDistance < 5) {
-            int i = new Random().nextInt(100) + 1;
-            if (i > 50) {
-                onPath = true;
-            }
-        }
-        // if (onPath == true && tileDistance > 20) {
-        // onPath = false;
-        // }
-    }
-
     public void setAction() {
-
         if (onPath == true) {
-            int goalCol = (gp.player.worldX + gp.player.solidArea.x) / gp.tileSize;
-            int goalRow = (gp.player.worldY + gp.player.solidArea.y) / gp.tileSize;
-
-            searchPath(goalCol, goalRow);
-
-            int i = new Random().nextInt(100) + 1;
-            if (i > 99 && projectile.alive == false && shotAvailableCounter == 30) {
-                projectile.set(worldX, worldY, direction, true, this);
-                // gp.projectileList.add(projectile);
-
-                // check vacancy
-                for (int j = 0; j < gp.projectile[1].length; j++) {
-                    if (gp.projectile[gp.currentMap][j] == null) {
-                        gp.projectile[gp.currentMap][j] = projectile;
-                        break;
-                    }
-                }
-                shotAvailableCounter = 0;
-            }
+            // 离得太远了不追了
+            checkStopChasingOrNot(gp.player, 15, 100);
+            // 找到前进方向
+            searchPath(getGoalCol(gp.player), getGoalRow(gp.player));
+            // 射
+            checkShootOrNot(200, 30);
         } else {
-            actionLockCounter++;
-
-            if (actionLockCounter == 120) {// move every 2 seconds
-                Random random = new Random();
-                int i = random.nextInt(100) + 1;// pick a number from 1-100
-
-                if (i <= 25) {
-                    direction = "up";
-                }
-                if (i > 25 && i <= 50) {
-                    direction = "down";
-                }
-                if (i > 50 && i <= 75) {
-                    direction = "left";
-                }
-                if (i > 75 && i <= 100) {
-                    direction = "right";
-                }
-                actionLockCounter = 0;
-            }
+            // 靠得太近了开始追
+            checkStartChasingOrNot(gp.player, 20, 100);
+            getRandomDirection();
         }
     }
 
