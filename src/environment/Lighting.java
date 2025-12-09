@@ -131,6 +131,18 @@ public class Lighting {
         g2.drawImage(darknessFilter, 0, 0, null);
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 
+        // 屏幕上显示时间，以下内容也可以全部注释掉
+        String situation = "";
+
+        switch (dayState) {
+            case day: situation = "Day"; break;
+            case dusk: situation = "Dusk"; break;
+            case night: situation = "Night"; break;
+            case dawn: situation = "Dawn"; break;
+        }
+        g2.setColor(Color.white);
+        g2.setFont(g2.getFont().deriveFont(50f));
+        g2.drawString(situation, 800, 500);
     }
 
 }

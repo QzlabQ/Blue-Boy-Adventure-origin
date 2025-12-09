@@ -16,7 +16,7 @@ public class UI {
 
     GamePanel gp;
     Graphics2D g2;
-    Font maruMonica;
+    public Font maruMonica;
     BufferedImage heart_full, heart_half, heart_blank, crystal_full, crystal_blank, coin;
     public boolean messageOn = false;
     // public String message = "";
