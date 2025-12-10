@@ -125,6 +125,11 @@ public class Lighting {
         }
     }
 
+    public void resetDay(){
+        dayState = day;
+        filterAlpha = 0f;
+        
+    }
     public void draw(Graphics2D g2) {
 
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, filterAlpha));
