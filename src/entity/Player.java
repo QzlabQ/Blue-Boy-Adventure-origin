@@ -43,8 +43,9 @@ public class Player extends Entity {
         // attackArea.height = 36;
 
         setDefaultValue();
-        getPlayerImage();
-        getPlayerAttackImage();
+        getImage();
+        getAttackImage();
+        getGuardImage();
         setItems();
     }
 
@@ -89,6 +90,7 @@ public class Player extends Entity {
         life = maxLife;
         mana = maxMana;
         invincible = false;
+        transparent = false;
     }
 
     public void setItems() {
@@ -111,7 +113,7 @@ public class Player extends Entity {
         return defense = dexterity * currentShield.defenseValue;
     }
 
-    public void getPlayerImage() {
+    public void getImage() {
 
         up1 = setup("/player/boy_up_1", gp.tileSize, gp.tileSize);
         up2 = setup("/player/boy_up_2", gp.tileSize, gp.tileSize);
@@ -134,7 +136,7 @@ public class Player extends Entity {
         right2 = image;
     }
 
-    public void getPlayerAttackImage() {
+    public void getAttackImage() {
 
         if (currentWeapon.type == type_sword) {
             attackUp1 = setup("/player/boy_attack_up_1", gp.tileSize, gp.tileSize * 2);
@@ -159,11 +161,62 @@ public class Player extends Entity {
 
     }
 
+    public void getGuardImage() {
+        guardUp = setup("/player/boy_guard_up", gp.tileSize, gp.tileSize);
+        guardDown = setup("/player/boy_guard_down", gp.tileSize, gp.tileSize);
+        guardLeft = setup("/player/boy_guard_left", gp.tileSize, gp.tileSize);
+        guardRight = setup("/player/boy_guard_right", gp.tileSize, gp.tileSize);
+    }
+
     public void update() {
 
-        if (attacking == true) {
+        if (knockBack == true) {
+
+            collisionOn = false;
+            gp.cChecker.checkTile(this);
+            gp.cChecker.checkObject(this, true);
+            gp.cChecker.checkEntity(this, gp.npc);
+            gp.cChecker.checkEntity(this, gp.monster);
+            if (collisionOn == true) {
+                knockBackCounter = 0;
+                knockBack = false;
+                speed = defaultSpeed;
+            } else if (collisionOn == false) {
+                switch (knockBackDirection) {
+                    case "up":
+                        worldY -= speed;
+                        break;
+                    case "down":
+                        worldY += speed;
+                        break;
+                    case "left":
+                        worldX -= speed;
+                        break;
+                    case "right":
+                        worldX += speed;
+                        break;
+                }
+            }
+
+            knockBackCounter++;
+            if (knockBackCounter == 10) {
+                knockBackCounter = 0;
+                knockBack = false;
+                speed = defaultSpeed;
+            }
+        }
+        else if (attacking == true) {
             attacking();
-        } else if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true ||
+        } else if (keyH.spacePressed == true) {
+            guarding = true;
+        } else if(offBalance == true){
+            offBalanceCounter++;
+            // 60 is for 1 second
+            if(offBalanceCounter > 60){
+                offBalance = false;
+                offBalanceCounter = 0;
+            }
+        }else if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true ||
                 keyH.rightPressed == true || keyH.enterPressed == true) {
             if (keyH.upPressed == true) {
                 direction = "up";
@@ -187,7 +240,7 @@ public class Player extends Entity {
             int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
             interactNPC(npcIndex);
 
-            // CHECK MINSTER COLLISION
+            // CHECK MONSTER COLLISION
             int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
             contactMonster(monsterIndex);
 
@@ -224,24 +277,26 @@ public class Player extends Entity {
 
             attackCanceled = false;
             gp.keyH.enterPressed = false;
+            guarding = false;
 
             spriteCounter++;
             if (spriteCounter > 12) {
-
                 if (spriteNum == 2) {// spriteNum is the Number of images, sprite Counter is the time which animation
                                      // will cost
-
                     spriteNum = 0;
-
                 }
-
                 spriteNum++;
-
                 spriteCounter = 0;
             }
 
+        } else {
+            guarding = false;
+            spriteCounter++;
+            if (spriteCounter == 20) {
+                spriteNum = 1;
+                spriteCounter = 0;
+            }
         }
-
         if (gp.keyH.shotKeyPressed == true && projectile.alive == false && shotAvailableCounter == 30
                 && projectile.haveResource(this)) {
 
@@ -269,6 +324,7 @@ public class Player extends Entity {
             invincibleCounter++;
             if (invincibleCounter > 60) {
                 invincible = false;
+                transparent = false;
                 invincibleCounter = 0;
             }
         }
@@ -343,11 +399,12 @@ public class Player extends Entity {
                 gp.playSE(6);
 
                 int damage = gp.monster[gp.currentMap][i].attack - defense;
-                if (damage < 0) {
-                    damage = 0;
+                if (damage < 1) {
+                    damage = 1;
                 }
                 life -= damage;
                 invincible = true;
+                transparent = true;
             }
 
         }
@@ -362,7 +419,10 @@ public class Player extends Entity {
                 if (knockBackPower > 0) {
                     setKnockBack(gp.monster[gp.currentMap][i], attacker, knockBackPower);
                 }
-
+                // 玩法：格挡击退后迅速攻击，伤害*5倍
+                if(gp.monster[gp.currentMap][i].offBalance == true){
+                    attack *= 5;
+                }
                 int damage = attack - gp.monster[gp.currentMap][i].defense;
                 if (damage < 0) {
                     damage = 0;
@@ -441,7 +501,7 @@ public class Player extends Entity {
 
                 currentWeapon = selectedItem;
                 attack = getAttack();
-                getPlayerAttackImage();
+                getAttackImage();
             }
             if (selectedItem.type == type_shield) {
 
@@ -530,6 +590,9 @@ public class Player extends Entity {
                         image = attackUp2;
                     }
                 }
+                if(guarding == true){
+                    image = guardUp;
+                }
                 break;
             case "down":
                 if (attacking == false) {
@@ -547,6 +610,9 @@ public class Player extends Entity {
                     if (spriteNum == 2) {
                         image = attackDown2;
                     }
+                }
+                if(guarding == true){
+                    image = guardDown;
                 }
                 break;
             case "left":
@@ -567,6 +633,9 @@ public class Player extends Entity {
                         image = attackLeft2;
                     }
                 }
+                if(guarding == true){
+                    image = guardLeft;
+                }
                 break;
             case "right":
                 if (attacking == false) {
@@ -585,10 +654,13 @@ public class Player extends Entity {
                         image = attackRight2;
                     }
                 }
+                if(guarding == true){
+                    image = guardRight;
+                }
                 break;
         }
 
-        if (invincible == true) {
+        if (transparent == true) {
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
         }
         g2.drawImage(image, tempScreenX, tempScreenY, null);
