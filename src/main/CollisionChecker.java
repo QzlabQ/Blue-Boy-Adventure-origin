@@ -76,6 +76,11 @@ public class CollisionChecker {
 
         int index = 999;
 
+        String direction = entity.direction;
+        if(entity.knockBack == true){
+            direction = entity.knockBackDirection;
+        }
+
         for (int i = 0; i < gp.obj[1].length; i++) {
 
             if (gp.obj[gp.currentMap][i] != null) {
@@ -91,7 +96,7 @@ public class CollisionChecker {
                         + gp.obj[gp.currentMap][i].solidArea.y; // you can specify the
                 // solid Area in each object with the
                 // latter part
-                switch (entity.direction) {
+                switch (direction) {
                     case "up":
                         entity.solidArea.y -= entity.speed;
                         break;

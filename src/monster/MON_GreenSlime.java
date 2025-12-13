@@ -62,7 +62,7 @@ public class MON_GreenSlime extends Entity {
         } else {
             // 靠得太近了开始追
             checkStartChasingOrNot(gp.player, 20, 100);
-            getRandomDirection();
+            getRandomDirection(120);
         }
     }
 

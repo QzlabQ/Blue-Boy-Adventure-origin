@@ -13,12 +13,14 @@ import object.OBJ_Boots;
 import object.OBJ_Chest;
 import object.OBJ_Coin_Bronze;
 import object.OBJ_Door;
+import object.OBJ_Door_Iron;
 import object.OBJ_Fireball;
 import object.OBJ_Heart;
 import object.OBJ_Key;
 import object.OBJ_Lantern;
 import object.OBJ_ManaCrystal;
 import object.OBJ_Potion_Red;
+import object.OBJ_Pickaxe;
 import object.OBJ_Rock;
 import object.OBJ_Shield_Blue;
 import object.OBJ_Shield_Wood;
@@ -48,6 +50,8 @@ public class SaveLoad {
             case "Mana Crystal": obj = new OBJ_ManaCrystal(gp); break;
             case "Heart": obj = new OBJ_Heart(gp); break; // 怪物可能会掉落爱心，建议加上
             case "Fireball": obj = new OBJ_Fireball(gp); break; 
+            case "Pickaxe": obj = new OBJ_Pickaxe(gp); break; 
+            case "Iron Door": obj = new OBJ_Door_Iron(gp); break; 
         }
         return obj;
     }

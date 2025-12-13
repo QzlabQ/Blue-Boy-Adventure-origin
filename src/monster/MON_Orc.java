@@ -76,7 +76,7 @@ public class MON_Orc extends Entity {
         } else {
             // 靠得太近了开始追
             checkStartChasingOrNot(gp.player, 25, 100);
-            getRandomDirection();
+            getRandomDirection(120);
         }
         if(attacking == false){
             // 把这个rate改小一点

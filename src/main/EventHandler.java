@@ -65,6 +65,8 @@ public class EventHandler {
             } else if (hit(1, 12, 13, "any") == true) {
                 teleport(0, 10, 39, gp.outside);
             } else if (hit(0,12,9,"any") == true) {
+                // 测试用
+                // teleport(3, 26, 41, gp.dungeon); // 主世界 传送到 dungeon02
                 teleport(2, 9, 41, gp.dungeon); // 主世界 传送到 dungeon01
             }else if (hit(2,9,41,"any") == true) {
                 teleport(0, 12, 9, gp.outside); // dungeon01 传送到 主世界
