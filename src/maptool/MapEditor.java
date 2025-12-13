@@ -522,9 +522,9 @@ public class MapEditor extends JFrame {
     }
 
     private void loadTileSet() {
-        setup(0, "grass00", false);
-        setup(1, "grass00", false);
-        setup(2, "grass00", false);
+        setup(0, "voidimg", false);
+        setup(1, "stairs1", false);
+        setup(2, "stairs2", false);
         setup(3, "grass00", false);
         setup(4, "grass00", false);
         setup(6, "grass00", false);

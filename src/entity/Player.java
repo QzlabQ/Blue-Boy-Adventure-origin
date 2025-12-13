@@ -90,6 +90,7 @@ public class Player extends Entity {
     public void restoreStatus() {
         life = maxLife;
         mana = maxMana;
+        speed = defaultSpeed;
         invincible = false;
         transparent = false;
         attacking = false;
@@ -568,21 +569,22 @@ public class Player extends Entity {
 
         boolean canObtain = false;
 
+        Entity newItem  =gp.eGenerator.getObject(item.name);
         // CHECK IF STACKABLE
-        if (item.stackable == true) {
+        if (newItem.stackable == true) {
             int index = searchItemInInventory(item.name);
             if (index != 999) {
                 inventory.get(index).amount++;
                 canObtain = true;
             } else { // new item so need to check vacancy
                 if (inventory.size() != maxInventorySize) {
-                    inventory.add(item);
+                    inventory.add(newItem);
                     canObtain = true;
                 }
             }
         } else { // not stackable so check vacancy
             if (inventory.size() != maxInventorySize) {
-                inventory.add(item);
+                inventory.add(newItem);
                 canObtain = true;
             }
         }
