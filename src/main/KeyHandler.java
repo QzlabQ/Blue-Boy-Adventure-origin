@@ -1,6 +1,5 @@
 package main;
 
-import java.awt.RenderingHints.Key;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -68,32 +67,33 @@ public class KeyHandler implements KeyListener {
 
     public void titleState(int code) {
 
-            if (code == KeyEvent.VK_W) {
-                gp.ui.commandNum--;
-                if (gp.ui.commandNum < 0) {
-                    gp.ui.commandNum = 2;
-                }
+        if (code == KeyEvent.VK_W) {
+            gp.ui.commandNum--;
+            if (gp.ui.commandNum < 0) {
+                gp.ui.commandNum = 2;
             }
-            if (code == KeyEvent.VK_S) {
-                gp.ui.commandNum++;
-                if (gp.ui.commandNum > 2) {
-                    gp.ui.commandNum = 0;
-                }
+        }
+        if (code == KeyEvent.VK_S) {
+            gp.ui.commandNum++;
+            if (gp.ui.commandNum > 2) {
+                gp.ui.commandNum = 0;
             }
-            if (code == KeyEvent.VK_ENTER) {
-                if (gp.ui.commandNum == 0) {
-                    gp.gameState=gp.playState;
-                    gp.playMusic(0);
-                }
-                if (gp.ui.commandNum == 1) {
-                    gp.saveLoad.load();;
-                    gp.gameState = gp.playState;
-                    gp.playMusic(0);
-                }
-                if (gp.ui.commandNum == 2) {
-                    System.exit(0);
-                }
+        }
+        if (code == KeyEvent.VK_ENTER) {
+            if (gp.ui.commandNum == 0) {
+                gp.gameState = gp.playState;
+                gp.playMusic(0);
             }
+            if (gp.ui.commandNum == 1) {
+                gp.saveLoad.load();
+                ;
+                gp.gameState = gp.playState;
+                gp.playMusic(0);
+            }
+            if (gp.ui.commandNum == 2) {
+                System.exit(0);
+            }
+        }
     }
 
     public void playState(int code) {
@@ -125,17 +125,17 @@ public class KeyHandler implements KeyListener {
         if (code == KeyEvent.VK_ESCAPE) {
             gp.gameState = gp.optionState;
         }
-        if(code == KeyEvent.VK_M){
+        if (code == KeyEvent.VK_M) {
             gp.gameState = gp.mapState;
         }
-        if(code == KeyEvent.VK_X){
-            if(gp.map.miniMapOn == false){
+        if (code == KeyEvent.VK_X) {
+            if (gp.map.miniMapOn == false) {
                 gp.map.miniMapOn = true;
-            }else{
+            } else {
                 gp.map.miniMapOn = false;
             }
         }
-        if(code == KeyEvent.VK_SPACE){
+        if (code == KeyEvent.VK_SPACE) {
             spacePressed = true;
         }
 
@@ -167,8 +167,9 @@ public class KeyHandler implements KeyListener {
             }
         }
     }
-    public void mapState(int code){
-        if(code == KeyEvent.VK_M){
+
+    public void mapState(int code) {
+        if (code == KeyEvent.VK_M) {
             gp.gameState = gp.playState;
         }
     }

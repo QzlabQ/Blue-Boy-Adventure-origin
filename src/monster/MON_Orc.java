@@ -4,7 +4,6 @@ import entity.Entity;
 import main.GamePanel;
 import object.OBJ_Coin_Bronze;
 import object.OBJ_Heart;
-import object.OBJ_Rock;
 import object.OBJ_ManaCrystal;
 
 import java.util.Random;
@@ -78,7 +77,7 @@ public class MON_Orc extends Entity {
             checkStartChasingOrNot(gp.player, 25, 100);
             getRandomDirection(120);
         }
-        if(attacking == false){
+        if (attacking == false) {
             // 把这个rate改小一点
             checkAttackOrNot(30, gp.tileSize * 4, gp.tileSize);
         }

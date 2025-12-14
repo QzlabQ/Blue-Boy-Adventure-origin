@@ -5,8 +5,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import javax.imageio.ImageIO;
-import java.util.HashMap;
 import java.util.Stack;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +15,7 @@ public class MapEditor extends JFrame {
     private static final int TILE_SIZE = 32;
 
     private int[][] mapData;
-    private HashMap<Integer, TileInfo> tileSet;
+    private TileSet tileSet;
     private JPanel[][] tilePanels;
 
     private JPanel mapPanel;
@@ -25,12 +23,10 @@ public class MapEditor extends JFrame {
     private JScrollPane mapScrollPane;
     private JLabel statusLabel;
     private JTextField mapFilePathField;
-    private JPanel toolbar;
 
     private int selectedTile = 0;
     private JButton selectedTileButton;
-    private JToggleButton mouseModeButton;
-    private JToggleButton coordsButton;
+    private JCheckBox coordsButton;
 
     private String currentMapFile = "res/maps/map.txt";
     private String tilesFolder = "res/tiles/";
@@ -41,89 +37,92 @@ public class MapEditor extends JFrame {
 
     private Stack<int[][]> undoStack = new Stack<>();
     private Stack<int[][]> redoStack = new Stack<>();
-    private final int MAX_UNDO_STEPS = 50;
+    private final int MAX_UNDO_STEPS = 1000;
 
     // 实体相关
     private List<EntityEntry> entityEntries = new ArrayList<>();
-    private JToggleButton entityEditToggle;
     private JLabel categoryLabel;
     private JComboBox<String> typeCombo;
-    private JTextField extraField;
     private JComboBox<String> extraCombo;
     private JPanel extraPanel;
+    private JPanel entityPanel; // 确保成员变量声明（虽然已在原文件顶部有声明，这里是为了逻辑清晰）
     private String selectedEntityType = "OBJ_Coin_Bronze";
+    private EntityImageCache entityImages = new EntityImageCache();
 
-    private class TileInfo {
-        String name;
-        boolean hasCollision;
-        BufferedImage image;
-        Color displayColor;
+    // 模式控制组件
+    private JRadioButton editModeRadio;
+    private JRadioButton mouseModeRadio;
+    private JRadioButton entityModeRadio;
 
-        TileInfo(String name, boolean hasCollision) {
-            this.name = name;
-            this.hasCollision = hasCollision;
-            this.image = null;
-            this.displayColor = generateColor(name);
-        }
+    private static List<MapEditor> openEditors = new ArrayList<>();
+    private String windowTitle;
 
-        private Color generateColor(String name) {
-            int hash = name.hashCode();
-            return new Color(
-                    Math.abs((hash & 0xFF0000) >> 16) % 200 + 55,
-                    Math.abs((hash & 0x00FF00) >> 8) % 200 + 55,
-                    Math.abs(hash & 0x0000FF) % 200 + 55);
-        }
-    }
+    private boolean dirty = false;
 
-    // 实体条目类
-    private static class EntityEntry {
-        String category;
-        String type;
-        int x;
-        int y;
-        String extra;
+    private MapEditorManager manager;
+    private int tabIndex = -1; // 添加此字段来跟踪选项卡索引
 
-        EntityEntry(String category, String type, int x, int y, String extra) {
-            this.category = category;
-            this.type = type;
-            this.x = x;
-            this.y = y;
-            this.extra = extra;
-        }
-
-        @Override
-        public String toString() {
-            if (extra == null || extra.isEmpty()) {
-                return category + "," + type + "," + x + "," + y;
-            } else {
-                return category + "," + type + "," + x + "," + y + "," + extra;
-            }
-        }
-    }
-
-    public MapEditor() {
+    public MapEditor(String filePath) {
         mapData = new int[MAP_HEIGHT][MAP_WIDTH];
-        tileSet = new HashMap<>();
+        tileSet = new TileSet();
         tilePanels = new JPanel[MAP_HEIGHT][MAP_WIDTH];
 
+        // 先加载方块资源，确保调色板创建时有数据
+        tileSet.loadTileSet(tilesFolder);
+
+        // 根据传入的文件路径处理地图文件路径
+        if (filePath != null && !filePath.isEmpty()) {
+            currentMapFile = filePath;
+        }
+        // 如果filePath为空，保持默认值，稍后会在newMapAction中更新
+
         initUI();
-        loadTileSet();
+        entityImages.loadEntityImages();
 
         ensureMapsFolder();
 
-        File defaultMap = new File(currentMapFile);
-        if (defaultMap.exists()) {
-            loadMap(currentMapFile);
+        // 根据传入的文件路径处理地图内容
+        if (filePath != null && !filePath.isEmpty()) {
+            File file = new File(filePath);
+            if (file.exists()) {
+                // 文件存在，加载地图
+                loadMap(filePath);
+                updateStatus("加载地图文件: " + file.getName());
+            } else {
+                // 文件不存在，创建新地图
+                clearMap();
+                updateStatus("新建地图文件: " + file.getName());
+            }
         } else {
+            // 没有指定文件路径，创建默认新地图
             clearMap();
             updateStatus("新建地图文件");
         }
 
-        setTitle("Blue Boy Adventure Map Editor - " + MAP_WIDTH + "x" + MAP_HEIGHT);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("Blue Boy Adventure Map Editor - " + new File(currentMapFile).getName() + " - " + MAP_WIDTH + "x"
+                + MAP_HEIGHT);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(1200, 800);
         setLocationRelativeTo(null);
         setVisible(true);
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                // 可以在这里添加保存提醒等功能
+            }
+
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                // 移除对不存在方法的调用
+                // 可以在这里添加其他清理工作
+            }
+        });
+    }
+
+    public MapEditor(String filePath, MapEditorManager manager) {
+        this(filePath); // 调用原有构造函数
+        this.manager = manager;
     }
 
     private void ensureMapsFolder() {
@@ -146,9 +145,12 @@ public class MapEditor extends JFrame {
             undoStack.remove(0);
         }
         redoStack.clear();
+
+        // 添加这一行
+        setDirty(true);
     }
 
-    private void undo() {
+    public void undo() {
         if (!undoStack.isEmpty()) {
             int[][] currentState = new int[MAP_HEIGHT][MAP_WIDTH];
             for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -162,7 +164,7 @@ public class MapEditor extends JFrame {
         }
     }
 
-    private void redo() {
+    public void redo() {
         if (!redoStack.isEmpty()) {
             int[][] currentState = new int[MAP_HEIGHT][MAP_WIDTH];
             for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -183,13 +185,98 @@ public class MapEditor extends JFrame {
         selectedTile = -1;
         selectedTileButton = null;
         mouseMode = false;
-        if (mouseModeButton != null) {
-            mouseModeButton.setSelected(false);
-        }
+        editModeRadio.setSelected(true);
         updateStatus();
     }
 
+    private void setEditMode() {
+        mouseMode = false;
+
+        // 恢复之前选中的方块
+        if (selectedTileButton != null) {
+            selectedTileButton.setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
+            // 不再强制设置selectedTile为0，保持当前选中的方块
+        } else if (selectedTile < 0) {
+            // 如果之前没有选中任何方块，则默认选择0号方块
+            selectedTile = 0;
+            updateSelectedTileButton();
+        }
+        updateStatus("方块编辑模式: 开启");
+    }
+
+    private void setMouseMode() {
+        mouseMode = true;
+
+        if (selectedTileButton != null) {
+            selectedTileButton.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        }
+        selectedTile = -1;
+        refreshMapDisplay();
+        updateStatus("鼠标模式: 开启");
+    }
+
+    private void setEntityMode() {
+        mouseMode = false;
+        updateStatus("实体编辑模式: 开启");
+        refreshMapDisplay();
+    }
+
     private void initUI() {
+        // 创建菜单栏
+        JMenuBar menuBar = new JMenuBar();
+
+        // 文件菜单
+        JMenu fileMenu = new JMenu("文件");
+
+        JMenuItem newMenuItem = new JMenuItem("新建");
+        newMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl N"));
+        newMenuItem.addActionListener(e -> newMapAction());
+
+        JMenuItem openMenuItem = new JMenuItem("打开");
+        openMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl O"));
+        openMenuItem.addActionListener(e -> loadMapAction());
+
+        JMenuItem saveMenuItem = new JMenuItem("保存");
+        saveMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl S"));
+        saveMenuItem.addActionListener(e -> saveMapAction());
+
+        JMenuItem saveAsMenuItem = new JMenuItem("另存为");
+        saveAsMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl shift S"));
+        saveAsMenuItem.addActionListener(e -> saveMapAsAction());
+
+        fileMenu.add(newMenuItem);
+        fileMenu.add(openMenuItem);
+        fileMenu.add(saveMenuItem);
+        fileMenu.add(saveAsMenuItem);
+
+        menuBar.add(fileMenu);
+
+        // 编辑菜单
+        JMenu editMenu = new JMenu("编辑");
+
+        JMenuItem undoMenuItem = new JMenuItem("撤销");
+        undoMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl Z"));
+        undoMenuItem.addActionListener(e -> undo());
+
+        JMenuItem redoMenuItem = new JMenuItem("重做");
+        redoMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl Y"));
+        redoMenuItem.addActionListener(e -> redo());
+
+        JMenuItem clearMenuItem = new JMenuItem("清空地图");
+        clearMenuItem.addActionListener(e -> clearMap());
+
+        editMenu.add(undoMenuItem);
+        editMenu.add(redoMenuItem);
+        editMenu.addSeparator();
+        editMenu.add(clearMenuItem);
+
+        menuBar.add(editMenu);
+
+        // 注意：这里已经移除了视图菜单的创建代码
+
+        setJMenuBar(menuBar);
+
+        // ... 其余代码保持不变
         JSplitPane mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         mainSplitPane.setDividerLocation(800);
         mainSplitPane.setResizeWeight(0.7);
@@ -208,7 +295,7 @@ public class MapEditor extends JFrame {
             @Override
             public void mouseDragged(MouseEvent e) {
                 // 检查是否在实体编辑模式
-                if (entityEditToggle != null && entityEditToggle.isSelected()) {
+                if (entityModeRadio.isSelected()) {
                     // 实体编辑模式下不执行任何拖拽操作
                     return;
                 }
@@ -227,17 +314,20 @@ public class MapEditor extends JFrame {
 
                 // 如果是第一次拖动，保存状态
                 if (lastPoint == null) {
-                    saveCurrentState();
-                    lastPoint = new Point(tileX, tileY);
+                    // 只有左键拖动才保存状态
+                    if ((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0) {
+                        saveCurrentState(); // 删除了 e.isControlDown() 条件检查
+                        lastPoint = new Point(tileX, tileY);
 
-                    // 设置单个格子
-                    mapData[tileY][tileX] = selectedTile;
-                    tilePanels[tileY][tileX].repaint();
+                        // 设置单个格子
+                        mapData[tileY][tileX] = selectedTile;
+                        tilePanels[tileY][tileX].repaint();
+                    }
                     return;
                 }
 
-                // 如果鼠标移到了新的格子
-                if (tileX != lastPoint.x || tileY != lastPoint.y) {
+                // 只有左键拖动才执行绘制
+                if ((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0) {
                     // 计算需要更新的区域
                     int startX = Math.min(tileX, lastPoint.x);
                     int endX = Math.max(tileX, lastPoint.x);
@@ -247,21 +337,19 @@ public class MapEditor extends JFrame {
                     Rectangle currentArea = new Rectangle(startX, startY,
                             endX - startX + 1, endY - startY + 1);
 
-                    // 如果区域有变化，更新所有格子
-                    if (lastArea == null || !currentArea.equals(lastArea)) {
-                        for (int y = startY; y <= endY; y++) {
-                            for (int x = startX; x <= endX; x++) {
-                                mapData[y][x] = selectedTile;
-                                tilePanels[y][x].repaint();
-                            }
+                    // 更新所有格子（无论是否按住Ctrl键都会保存状态）
+                    for (int y = startY; y <= endY; y++) {
+                        for (int x = startX; x <= endX; x++) {
+                            mapData[y][x] = selectedTile;
+                            tilePanels[y][x].repaint();
                         }
-                        lastArea = currentArea;
                     }
+                    lastArea = currentArea;
 
                     lastPoint = new Point(tileX, tileY);
-                }
 
-                updateStatus();
+                    updateStatus();
+                }
             }
 
             public void mouseReleased(MouseEvent e) {
@@ -280,12 +368,12 @@ public class MapEditor extends JFrame {
                     protected void paintComponent(Graphics g) {
                         super.paintComponent(g);
                         int tileId = mapData[posY][posX];
-                        TileInfo tile = tileSet.get(tileId);
+                        TileInfo tile = tileSet.getTile(tileId);
 
-                        if (tile != null && tile.image != null) {
-                            g.drawImage(tile.image, 0, 0, TILE_SIZE, TILE_SIZE, this);
+                        if (tile != null && tile.getImage() != null) {
+                            g.drawImage(tile.getImage(), 0, 0, TILE_SIZE, TILE_SIZE, this);
                         } else if (tile != null) {
-                            g.setColor(tile.displayColor);
+                            g.setColor(tile.getDisplayColor());
                             g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
                         } else {
                             g.setColor(Color.PINK);
@@ -295,7 +383,7 @@ public class MapEditor extends JFrame {
                         g.setColor(Color.GRAY);
                         g.drawRect(0, 0, TILE_SIZE - 1, TILE_SIZE - 1);
 
-                        if (tile != null && tile.hasCollision) {
+                        if (tile != null && tile.hasCollision()) {
                             g.setColor(new Color(255, 0, 0, 150));
                             g.fillRect(TILE_SIZE - 8, 0, 8, 8);
                         }
@@ -311,17 +399,73 @@ public class MapEditor extends JFrame {
                             g.drawString(posX + "," + posY, TILE_SIZE - 20, TILE_SIZE - 3);
                         }
 
-                        // 绘制实体指示器
+                        // 绘制实体指示器 - 改进版本
                         if (hasEntityAt(posX, posY)) {
-                            g.setColor(new Color(0, 255, 0, 100));
-                            g.fillOval(TILE_SIZE - 10, TILE_SIZE - 10, 8, 8);
+                            // 查找当前位置的实体类型
+                            String entityType = null;
+                            String entityExtra = null;
+                            for (EntityEntry entry : entityEntries) {
+                                if (entry.getX() == posX && entry.getY() == posY) {
+                                    entityType = entry.getType();
+                                    entityExtra = entry.getExtra();
+                                    break;
+                                }
+                            }
+
+                            if (entityType != null) {
+                                // 尝试获取实体图像
+                                BufferedImage entityImage = entityImages.getImage(entityType);
+                                if (entityImage != null) {
+                                    // 绘制实体图像，居中显示在格子中
+                                    int imgWidth = Math.min(TILE_SIZE - 8, entityImage.getWidth());
+                                    int imgHeight = Math.min(TILE_SIZE - 8, entityImage.getHeight());
+                                    int imgX = (TILE_SIZE - imgWidth) / 2;
+                                    int imgY = (TILE_SIZE - imgHeight) / 2;
+
+                                    g.drawImage(entityImage, imgX, imgY, imgWidth, imgHeight, this);
+                                } else {
+                                    // 如果没有找到图像，使用原来的绿色圆点
+                                    g.setColor(new Color(0, 255, 0, 180));
+                                    g.fillOval(6, 6, TILE_SIZE - 12, TILE_SIZE - 12);
+                                    g.setColor(Color.BLACK);
+                                    g.drawOval(6, 6, TILE_SIZE - 12, TILE_SIZE - 12);
+                                }
+
+                                // 对于箱子，如果没有战利品则用红色高亮显示
+                                if (entityType.equals("OBJ_Chest")
+                                        && (entityExtra == null || entityExtra.isEmpty() || entityExtra.equals("无"))) {
+                                    // 用红色边框高亮显示没有战利品的箱子
+                                    g.setColor(Color.RED);
+                                    Graphics2D g2d = (Graphics2D) g;
+                                    g2d.setStroke(new BasicStroke(3));
+                                    g.drawRect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                                } else {
+                                    // 始终添加高亮效果，而不仅仅在实体编辑模式下
+                                    g.setColor(new Color(255, 255, 0, 100));
+                                    g.fillOval(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                                }
+
+                                // 重新绘制实体图像或绿色圆点
+                                if (entityImage != null) {
+                                    int imgWidth = Math.min(TILE_SIZE - 8, entityImage.getWidth());
+                                    int imgHeight = Math.min(TILE_SIZE - 8, entityImage.getHeight());
+                                    int imgX = (TILE_SIZE - imgWidth) / 2;
+                                    int imgY = (TILE_SIZE - imgHeight) / 2;
+
+                                    g.drawImage(entityImage, imgX, imgY, imgWidth, imgHeight, this);
+                                } else {
+                                    g.setColor(new Color(0, 255, 0, 180));
+                                    g.fillOval(6, 6, TILE_SIZE - 12, TILE_SIZE - 12);
+                                    g.setColor(Color.BLACK);
+                                    g.drawOval(6, 6, TILE_SIZE - 12, TILE_SIZE - 12);
+                                }
+                            }
                         }
 
-                        // 删除鼠标模式的绿色覆盖层
-                        // if (mouseMode) {
-                        // g.setColor(new Color(0, 255, 0, 100));
-                        // g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-                        // }
+                        // 当处于实体模式并且鼠标悬停时，添加视觉提示
+                        if (entityModeRadio.isSelected()) {
+                            // 可以根据需要添加更多视觉提示
+                        }
                     }
                 };
                 tilePanel.setPreferredSize(new Dimension(TILE_SIZE, TILE_SIZE));
@@ -330,22 +474,23 @@ public class MapEditor extends JFrame {
                 tilePanel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
+                        boolean isInEntityMode = entityModeRadio.isSelected();
+
                         // 在实体编辑模式下不保存方块编辑状态
-                        if (entityEditToggle != null && entityEditToggle.isSelected()) {
+                        if (isInEntityMode) {
                             return;
                         }
 
                         if (mouseMode || e.getButton() != MouseEvent.BUTTON1) {
                             return;
                         }
-                        if (!e.isControlDown()) { // 按住Ctrl键时不保存状态
-                            saveCurrentState();
-                        }
                     }
 
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        if (entityEditToggle != null && entityEditToggle.isSelected()) {
+                        boolean isInEntityMode = entityModeRadio.isSelected();
+
+                        if (isInEntityMode) {
                             // 实体编辑模式
                             if (SwingUtilities.isLeftMouseButton(e)) {
                                 String category = determineCategory(selectedEntityType);
@@ -370,40 +515,60 @@ public class MapEditor extends JFrame {
                                 updateStatus("已删除坐标 (" + posX + "," + posY + ") 的实体");
                             }
                         } else if (mouseMode) {
-                            int tileId = mapData[posY][posX];
-                            TileInfo tile = tileSet.get(tileId);
-                            if (tile != null) {
-                                String info = "位置: (" + posX + ", " + posY + ")\n" +
-                                        "方块ID: " + tileId + "\n" +
-                                        "名称: " + tile.name + "\n" +
-                                        "碰撞: " + (tile.hasCollision ? "有" : "无");
-                                JOptionPane.showMessageDialog(MapEditor.this, info,
-                                        "方块信息", JOptionPane.INFORMATION_MESSAGE);
+                            // 鼠标模式下只有左键有效
+                            if (SwingUtilities.isLeftMouseButton(e)) {
+                                int tileId = mapData[posY][posX];
+                                TileInfo tile = tileSet.getTile(tileId);
+
+                                StringBuilder infoBuilder = new StringBuilder();
+                                infoBuilder.append("位置: (").append(posX).append(", ").append(posY).append(")\n")
+                                        .append("方块ID: ").append(tileId).append("\n");
+
+                                if (tile != null) {
+                                    infoBuilder.append("名称: ").append(tile.getName()).append("\n")
+                                            .append("碰撞: ").append(tile.hasCollision() ? "有" : "无");
+                                }
+
+                                // 添加实体信息
+                                EntityEntry entityAtPosition = getEntityAt(posX, posY);
+                                if (entityAtPosition != null) {
+                                    infoBuilder.append("\n\n实体信息:\n")
+                                            .append("类型: ").append(entityAtPosition.getType()).append("\n")
+                                            .append("类别: ").append(entityAtPosition.getCategory());
+
+                                    if (entityAtPosition.getExtra() != null && !entityAtPosition.getExtra().isEmpty()) {
+                                        infoBuilder.append("\n额外参数: ").append(entityAtPosition.getExtra());
+                                    }
+                                } else {
+                                    infoBuilder.append("\n\n该位置无实体");
+                                }
+
+                                JOptionPane.showMessageDialog(MapEditor.this, infoBuilder.toString(),
+                                        "方块与实体信息", JOptionPane.INFORMATION_MESSAGE);
                             }
-                        } else if (SwingUtilities.isRightMouseButton(e)) {
-                            int tileId = mapData[posY][posX];
-                            TileInfo tile = tileSet.get(tileId);
-                            if (tile != null) {
-                                selectedTile = tileId;
-                                updateSelectedTileButton();
-                                updateStatus();
-                            }
-                        } else if (selectedTile >= 0) {
+                            // 右键在鼠标模式下不做任何事情
+                        } else if (SwingUtilities.isLeftMouseButton(e) && selectedTile >= 0) {
+                            saveCurrentState();
                             mapData[posY][posX] = selectedTile;
                             tilePanel.repaint();
                             updateStatus();
                         }
+                        // 右键不再有任何效果
                     }
 
                     @Override
                     public void mouseEntered(MouseEvent e) {
-                        if (entityEditToggle != null && entityEditToggle.isSelected()) {
-                            // 实体编辑模式下不显示黄色边框
+                        boolean isInEntityMode = entityModeRadio.isSelected();
+
+                        if (isInEntityMode) {
+                            // 实体编辑模式下不显示黄色边框，但刷新面板以显示可能的高亮
                             tilePanel.repaint();
                         } else if (mouseMode) {
-                            // 鼠标模式下不显示边框效果，只重绘面板
+                            // 鼠标模式下显示黄色边框
+                            tilePanel.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 2));
                             tilePanel.repaint();
                         } else if (e.isShiftDown() && selectedTile >= 0) {
+                            saveCurrentState();
                             // Shift键+鼠标移动：连续绘制
                             mapData[posY][posX] = selectedTile;
                             tilePanel.repaint();
@@ -427,8 +592,13 @@ public class MapEditor extends JFrame {
                     @Override
                     public void mouseDragged(MouseEvent e) {
                         // 检查是否在实体编辑模式
-                        if (entityEditToggle != null && entityEditToggle.isSelected()) {
+                        if (entityModeRadio.isSelected()) {
                             // 实体编辑模式下不执行任何拖拽操作
+                            return;
+                        }
+
+                        // 只响应左键拖动
+                        if ((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) == 0) {
                             return;
                         }
 
@@ -436,9 +606,8 @@ public class MapEditor extends JFrame {
                             return;
 
                         if (!isDragging) {
-                            if (!e.isControlDown()) { // 按住Ctrl键时不保存状态
-                                saveCurrentState();
-                            }
+                            // 删除了 Ctrl 键检查，总是保存状态
+                            saveCurrentState();
                             isDragging = true;
                         }
                         mapData[posY][posX] = selectedTile;
@@ -457,44 +626,20 @@ public class MapEditor extends JFrame {
         }
 
         mapScrollPane = new JScrollPane(mapPanel);
+        // 提高滚动速度 - 增加单位增量和块增量
+        mapScrollPane.getVerticalScrollBar().setUnitIncrement(20); // 单次滚动步长
+        mapScrollPane.getVerticalScrollBar().setBlockIncrement(100); // 页面滚动步长
+        mapScrollPane.getHorizontalScrollBar().setUnitIncrement(20); // 单次滚动步长
+        mapScrollPane.getHorizontalScrollBar().setBlockIncrement(100); // 页面滚动步长
         mapScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         mapScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         JPanel toolbar = new JPanel(new BorderLayout());
         toolbar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        JPanel fileToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel optionToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        JButton loadButton = new JButton("加载");
-        loadButton.addActionListener(e -> loadMapAction());
-
-        JButton saveButton = new JButton("保存");
-        saveButton.addActionListener(e -> saveMapAction());
-
-        JButton saveAsButton = new JButton("另存");
-        saveAsButton.addActionListener(e -> saveMapAsAction());
-
-        JButton newButton = new JButton("新建");
-        newButton.addActionListener(e -> newMapAction());
-
-        JButton clearButton = new JButton("清空");
-        clearButton.addActionListener(e -> clearMap());
-
-        JButton undoButton = new JButton("撤销");
-        undoButton.addActionListener(e -> undo());
-
-        JButton redoButton = new JButton("重做");
-        redoButton.addActionListener(e -> redo());
-
-        JButton clearSelectButton = new JButton("取消选择");
-        clearSelectButton.addActionListener(e -> clearSelection());
-
-        mapFilePathField = new JTextField(new File(currentMapFile).getName(), 20);
-        mapFilePathField.setEditable(false);
-
-        coordsButton = new JToggleButton("坐标");
-        coordsButton.setSelected(showCoordinates);
+        coordsButton = new JCheckBox("显示坐标", showCoordinates);
         coordsButton.addActionListener(e -> {
             showCoordinates = coordsButton.isSelected();
             refreshMapDisplay();
@@ -503,36 +648,25 @@ public class MapEditor extends JFrame {
         JButton helpButton = new JButton("帮助");
         helpButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(MapEditor.this,
-                    "操作指南：\n" +
-                            "• 左键：放置方块\n" +
-                            "• 右键：选择方块\n" +
-                            "• 拖拽：连续绘制（滑动鼠标可批量填充）\n" +
-                            "• Shift+鼠标移动：连续绘制\n" +
-                            "• Ctrl+拖拽：无撤销记录的连续绘制\n" +
-                            "• 鼠标模式：查看方块信息\n" +
-                            "• 取消选择：退出编辑模式\n" +
-                            "• 坐标按钮：显示/隐藏坐标\n" +
+                    "方块编辑模式：\n" +
+                            "• 左键：放置单个方块\n" +
+                            "• Shift+鼠标移动：连续放置\n" +
+                            "\n鼠标模式：\n" +
+                            "• 左键：查看方块信息\n" +
+                            "\n实体编辑模式：\n" +
+                            "• 左键添加实体，右键删除实体\n" +
+                            "\n快捷键：\n" +
                             "• 撤销/重做：Ctrl+Z/Ctrl+Y\n" +
-                            "• ESC：取消选择\n" +
                             "• ID始终显示在方块左上角\n" +
-                            "• 碰撞方块有红色标记\n" +
-                            "• 实体编辑模式：左键添加实体，右键删除实体",
+                            "• 碰撞方块有红色标记\n",
                     "操作指南",
                     JOptionPane.INFORMATION_MESSAGE);
         });
 
-        fileToolbar.add(new JLabel("地图:"));
-        fileToolbar.add(mapFilePathField);
-        fileToolbar.add(newButton);
-        fileToolbar.add(loadButton);
-        fileToolbar.add(saveButton);
-        fileToolbar.add(saveAsButton);
-        fileToolbar.add(clearButton);
-        fileToolbar.add(undoButton);
-        fileToolbar.add(redoButton);
-        fileToolbar.add(clearSelectButton);
-
-        optionToolbar.add(new JLabel("选项:"));
+        optionToolbar.add(new JLabel("地图:"));
+        mapFilePathField = new JTextField(new File(currentMapFile).getName(), 20);
+        mapFilePathField.setEditable(false);
+        optionToolbar.add(mapFilePathField);
         optionToolbar.add(coordsButton);
         optionToolbar.add(helpButton);
 
@@ -540,9 +674,9 @@ public class MapEditor extends JFrame {
         JPanel modePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         modePanel.setBorder(BorderFactory.createTitledBorder("模式选择"));
 
-        JRadioButton editModeRadio = new JRadioButton("方块编辑模式", true);
-        JRadioButton mouseModeRadio = new JRadioButton("鼠标模式");
-        JRadioButton entityModeRadio = new JRadioButton("实体编辑模式");
+        editModeRadio = new JRadioButton("方块编辑模式", true);
+        mouseModeRadio = new JRadioButton("鼠标模式");
+        entityModeRadio = new JRadioButton("实体编辑模式");
 
         // 创建按钮组确保互斥选择
         ButtonGroup modeGroup = new ButtonGroup();
@@ -551,46 +685,14 @@ public class MapEditor extends JFrame {
         modeGroup.add(entityModeRadio);
 
         // 添加事件监听器
-        editModeRadio.addActionListener(e -> {
-            mouseMode = false;
-            mouseModeButton.setSelected(false);
-            entityEditToggle.setSelected(false);
-
-            // 恢复之前选中的方块
-            if (selectedTileButton != null) {
-                selectedTileButton.setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
-                selectedTile = 0; // 恢复默认选中方块
-            }
-            updateStatus("方块编辑模式: 开启");
-        });
-
-        mouseModeRadio.addActionListener(e -> {
-            mouseMode = true;
-            mouseModeButton.setSelected(true);
-            entityEditToggle.setSelected(false);
-
-            if (selectedTileButton != null) {
-                selectedTileButton.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-            }
-            selectedTile = -1;
-            refreshMapDisplay();
-            updateStatus("鼠标模式: 开启");
-        });
-
-        entityModeRadio.addActionListener(e -> {
-            mouseMode = false;
-            mouseModeButton.setSelected(false);
-            entityEditToggle.setSelected(true);
-
-            updateStatus("实体编辑模式: 开启");
-            refreshMapDisplay();
-        });
+        editModeRadio.addActionListener(e -> setEditMode());
+        mouseModeRadio.addActionListener(e -> setMouseMode());
+        entityModeRadio.addActionListener(e -> setEntityMode());
 
         modePanel.add(editModeRadio);
         modePanel.add(mouseModeRadio);
         modePanel.add(entityModeRadio);
 
-        toolbar.add(fileToolbar, BorderLayout.NORTH);
         toolbar.add(optionToolbar, BorderLayout.CENTER);
         toolbar.add(modePanel, BorderLayout.SOUTH);
 
@@ -626,10 +728,50 @@ public class MapEditor extends JFrame {
 
         JScrollPane paletteScrollPane = new JScrollPane(tilePalettePanel);
         paletteScrollPane.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+        // 提高调色板滚动速度
+        paletteScrollPane.getVerticalScrollBar().setUnitIncrement(20);
+        paletteScrollPane.getVerticalScrollBar().setBlockIncrement(100);
 
-        // 实体编辑面板
-        JPanel entityPanel = new JPanel(new BorderLayout(5, 5));
+        // 实体编辑面板 (初始化类成员变量)
+        entityPanel = new JPanel(new BorderLayout(5, 5));
         entityPanel.setBorder(BorderFactory.createTitledBorder("实体编辑"));
+        entityPanel.setVisible(false); // 默认隐藏
+
+        // 修改 modePanel 的事件监听器，添加显示/隐藏逻辑
+        editModeRadio.addActionListener(e -> {
+            setEditMode();
+            // 显示方块调色板，隐藏实体面板
+            paletteHeader.setVisible(true);
+            paletteScrollPane.setVisible(true);
+            entityPanel.setVisible(false);
+            rightPanel.revalidate();
+            rightPanel.repaint();
+        });
+
+        mouseModeRadio.addActionListener(e -> {
+            setMouseMode();
+            // 隐藏方块调色板和实体面板
+            paletteHeader.setVisible(false);
+            paletteScrollPane.setVisible(false);
+            entityPanel.setVisible(false);
+            rightPanel.revalidate();
+            rightPanel.repaint();
+        });
+
+        entityModeRadio.addActionListener(e -> {
+            setEntityMode();
+            // 隐藏方块调色板，显示实体面板
+            paletteHeader.setVisible(false);
+            paletteScrollPane.setVisible(false);
+            entityPanel.setVisible(true);
+            rightPanel.revalidate();
+            rightPanel.repaint();
+        });
+
+        // 初始化时根据默认模式设置可见性
+        paletteHeader.setVisible(true);
+        paletteScrollPane.setVisible(true);
+        entityPanel.setVisible(false);
 
         JPanel entityTop = new JPanel(new GridLayout(4, 1, 3, 3));
 
@@ -639,15 +781,50 @@ public class MapEditor extends JFrame {
 
         // 类型选择
         String[] entityTypes = {
-                "OBJ_Coin_Bronze", "OBJ_Key", "OBJ_Tent", "OBJ_Axe", "OBJ_Shield_Blue",
-                "OBJ_Potion_Red", "OBJ_ManaCrystal", "OBJ_Door", "OBJ_Chest", "OBJ_Lantern",
-                "OBJ_Pickaxe", "OBJ_Door_Iron", "OBJ_Heart", "OBJ_Fireball", "OBJ_Rock",
-                "OBJ_Sword_Normal", "OBJ_Boots",
-                "NPC_OldMan", "NPC_Merchant", "NPC_BigRock",
-                "MON_GreenSlime", "MON_Orc", "MON_Bat", "MON_RedSlime", "MON_SkeletonLord",
-                "IT_DryTree", "IT_DestructibleWall", "IT_MetalPlate", "IT_Trunk"
+                // IT 类型 (环境/物品)
+                "IT_DestructibleWall", "IT_DryTree", "IT_MetalPlate", "IT_Trunk",
+
+                // MON 类型 (怪物)
+                "MON_Bat", "MON_GreenSlime", "MON_Orc", "MON_RedSlime", "MON_SkeletonLord",
+
+                // NPC 类型 (NPC角色)
+                "NPC_BigRock", "NPC_Merchant", "NPC_OldMan",
+
+                // OBJ 类型 (可交互对象)
+                "OBJ_Axe", "OBJ_Boots", "OBJ_Chest", "OBJ_Coin_Bronze", "OBJ_Door",
+                "OBJ_Door_Iron", "OBJ_Fireball", "OBJ_Heart", "OBJ_Key", "OBJ_Lantern",
+                "OBJ_ManaCrystal", "OBJ_Pickaxe", "OBJ_Potion_Red", "OBJ_Rock",
+                "OBJ_Shield_Blue", "OBJ_Sword_Normal", "OBJ_Tent"
         };
+        
+        // 创建带图标的支持渲染的combobox
         typeCombo = new JComboBox<>(entityTypes);
+        typeCombo.setPreferredSize(new Dimension(200, 30)); // 设置下拉框尺寸
+        typeCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                
+                if (value instanceof String) {
+                    String entityType = (String) value;
+                    setText(entityType);
+                    
+                    // 获取实体图像
+                    BufferedImage entityImage = entityImages.getImage(entityType);
+                    if (entityImage != null) {
+                        // 缩放图像以适应显示 (增大到24x24像素)
+                        Image scaledImage = entityImage.getScaledInstance(24, 24, Image.SCALE_SMOOTH);
+                        setIcon(new ImageIcon(scaledImage));
+                    } else {
+                        setIcon(null);
+                    }
+                }
+                
+                return this;
+            }
+        });
+        
         typeCombo.addActionListener(e -> {
             selectedEntityType = (String) typeCombo.getSelectedItem();
             String category = determineCategory(selectedEntityType);
@@ -656,6 +833,29 @@ public class MapEditor extends JFrame {
             // 根据类型显示额外参数输入框
             boolean isChest = selectedEntityType.equals("OBJ_Chest");
             extraPanel.setVisible(isChest);
+
+            // 处理箱子的战利品警告
+            if (isChest) {
+                // 找到警告标签并根据选择显示/隐藏
+                Component[] components = extraPanel.getComponents();
+                JLabel warningLabel = null;
+                for (Component component : components) {
+                    if (component instanceof JLabel && ((JLabel) component).getText().startsWith("!!!")) {
+                        warningLabel = (JLabel) component;
+                        break;
+                    }
+                }
+
+                if (warningLabel != null) {
+                    // 检查当前选择的战利品是否为"无"
+                    Object selectedItem = extraCombo.getSelectedItem();
+                    if (selectedItem != null && selectedItem.equals("无")) {
+                        warningLabel.setVisible(true);
+                    } else {
+                        warningLabel.setVisible(false);
+                    }
+                }
+            }
         });
         selectedEntityType = (String) typeCombo.getSelectedItem();
         entityTop.add(new JLabel("类型:"));
@@ -668,53 +868,111 @@ public class MapEditor extends JFrame {
         // 创建战利品下拉框
         String[] lootTypes = {
                 "无",
-                "OBJ_Coin_Bronze", "OBJ_Key", "OBJ_Tent", "OBJ_Axe", "OBJ_Shield_Blue",
-                "OBJ_Potion_Red", "OBJ_ManaCrystal", "OBJ_Door", "OBJ_Lantern",
-                "OBJ_Pickaxe", "OBJ_Door_Iron", "OBJ_Heart", "OBJ_Fireball", "OBJ_Rock",
-                "OBJ_Sword_Normal", "OBJ_Boots"
+                // OBJ 类型 (可交互对象) - 按字典序排列
+                "OBJ_Axe", "OBJ_Boots", "OBJ_Coin_Bronze", "OBJ_Door", "OBJ_Door_Iron",
+                "OBJ_Fireball", "OBJ_Heart", "OBJ_Key", "OBJ_Lantern", "OBJ_ManaCrystal",
+                "OBJ_Pickaxe", "OBJ_Potion_Red", "OBJ_Rock", "OBJ_Shield_Blue",
+                "OBJ_Sword_Normal", "OBJ_Tent"
         };
         extraCombo = new JComboBox<>(lootTypes);
+        extraCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                
+                if (value instanceof String) {
+                    String entityType = (String) value;
+                    // 对于"无"选项不显示图标
+                    if (!entityType.equals("无")) {
+                        setText(entityType);
+                        
+                        // 获取实体图像
+                        BufferedImage entityImage = entityImages.getImage(entityType);
+                        if (entityImage != null) {
+                            // 缩放图像以适应显示
+                            Image scaledImage = entityImage.getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+                            setIcon(new ImageIcon(scaledImage));
+                        } else {
+                            setIcon(null);
+                        }
+                    } else {
+                        setText(entityType);
+                        setIcon(null); // "无"选项不显示图标
+                    }
+                }
+                
+                return this;
+            }
+        });
         extraCombo.setSelectedIndex(0);
+        extraCombo.addActionListener(e -> {
+            // 检查当前是否选择了箱子类型
+            if (selectedEntityType != null && selectedEntityType.equals("OBJ_Chest")) {
+                // 找到警告标签并根据选择显示/隐藏
+                Component[] components = extraPanel.getComponents();
+                JLabel warningLabel = null;
+                for (Component component : components) {
+                    if (component instanceof JLabel && ((JLabel) component).getText().startsWith("!!!")) {
+                        warningLabel = (JLabel) component;
+                        break;
+                    }
+                }
+
+                if (warningLabel != null) {
+                    // 检查选择的战利品是否为"无"
+                    Object selectedItem = extraCombo.getSelectedItem();
+                    if (selectedItem != null && selectedItem.equals("无")) {
+                        warningLabel.setVisible(true);
+                    } else {
+                        warningLabel.setVisible(false);
+                    }
+                }
+            }
+        });
+
+        // 创建醒目的警告标签，显示三个感叹号和文字提示
+        JLabel warningLabel = new JLabel("!!! 请选择战利品");
+        warningLabel.setForeground(Color.RED);
+        warningLabel.setFont(new Font("Microsoft YaHei", Font.BOLD, 14)); // 使用支持中文的字体
+        warningLabel.setVisible(false); // 默认隐藏
+        warningLabel.setToolTipText("请为箱子选择一个战利品");
+
         extraPanel.add(extraCombo);
+        extraPanel.add(warningLabel);
         extraPanel.setVisible(false); // 默认隐藏
         entityTop.add(extraPanel);
 
         entityPanel.add(entityTop, BorderLayout.NORTH);
 
-        // 实体编辑开关
-        JPanel entityBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        entityEditToggle = new JToggleButton("实体编辑模式");
-        entityEditToggle.addActionListener(e -> {
-            boolean isSelected = entityEditToggle.isSelected();
-            if (isSelected) {
-                mouseMode = false;
-                mouseModeButton.setSelected(false);
-                updateStatus("实体编辑模式: 开启");
-            } else {
-                updateStatus("实体编辑模式: 关闭");
-            }
-            refreshMapDisplay();
-        });
-        entityBottom.add(entityEditToggle);
-
+        // 添加清空实体按钮
         JButton clearEntitiesBtn = new JButton("清空实体");
         clearEntitiesBtn.addActionListener(e -> {
             entityEntries.clear();
             refreshMapDisplay();
             updateStatus("已清空所有实体");
         });
-        entityBottom.add(clearEntitiesBtn);
+        entityPanel.add(clearEntitiesBtn, BorderLayout.SOUTH);
 
-        entityPanel.add(entityBottom, BorderLayout.SOUTH);
-
-        rightPanel.add(paletteHeader, BorderLayout.NORTH);
-        rightPanel.add(paletteScrollPane, BorderLayout.CENTER); // 直接使用 paletteScrollPane 而不是 centerRight
-        rightPanel.add(entityPanel, BorderLayout.SOUTH);
+        rightPanel.add(entityPanel, BorderLayout.NORTH); // 将实体编辑面板移到上方
+        rightPanel.add(paletteHeader, BorderLayout.CENTER); // 调整方块调色板位置
+        rightPanel.add(paletteScrollPane, BorderLayout.SOUTH); // 调整方块调色板滚动面板位置
 
         mainSplitPane.setLeftComponent(leftPanel);
         mainSplitPane.setRightComponent(rightPanel);
 
         setupKeyboardShortcuts();
+
+        // 初始化调色板按钮
+        createPaletteButtons();
+
+        SwingUtilities.invokeLater(() -> {
+            paletteHeader.setVisible(true);
+            paletteScrollPane.setVisible(true);
+            entityPanel.setVisible(false);
+            rightPanel.revalidate();
+            rightPanel.repaint();
+        });
     }
 
     private String determineCategory(String typeName) {
@@ -732,7 +990,7 @@ public class MapEditor extends JFrame {
 
     private boolean hasEntityAt(int x, int y) {
         for (EntityEntry entry : entityEntries) {
-            if (entry.x == x && entry.y == y) {
+            if (entry.getX() == x && entry.getY() == y) {
                 return true;
             }
         }
@@ -741,81 +999,16 @@ public class MapEditor extends JFrame {
 
     private void addEntityAt(String category, String type, int x, int y, String extra) {
         // 移除该位置已存在的实体
-        entityEntries.removeIf(entry -> entry.x == x && entry.y == y);
+        entityEntries.removeIf(entry -> entry.getX() == x && entry.getY() == y);
 
         // 添加新实体
         entityEntries.add(new EntityEntry(category, type, x, y, extra));
+        setDirty(true);
     }
 
     private void removeEntityAt(int x, int y) {
-        entityEntries.removeIf(entry -> entry.x == x && entry.y == y);
-    }
-
-    private void loadTileSet() {
-        setup(0, "voidimg", false);
-        setup(1, "stairs1", false);
-        setup(2, "stairs2", false);
-        setup(3, "grass00", false);
-        setup(4, "grass00", false);
-        setup(6, "grass00", false);
-        setup(7, "grass00", false);
-        setup(8, "grass00", false);
-        setup(9, "grass00", false);
-
-        setup(10, "grass00", false);
-        setup(11, "grass01", false);
-        setup(12, "water00", true);
-        setup(13, "water01", true);
-        setup(14, "water02", true);
-        setup(15, "water03", true);
-        setup(16, "water04", true);
-        setup(17, "water05", true);
-        setup(18, "water06", true);
-        setup(19, "water07", true);
-        setup(20, "water08", true);
-        setup(21, "water09", true);
-        setup(22, "water10", true);
-        setup(23, "water11", true);
-        setup(24, "water12", true);
-        setup(25, "water13", true);
-        setup(26, "road00", false);
-        setup(27, "road01", false);
-        setup(28, "road02", false);
-        setup(29, "road03", false);
-        setup(30, "road04", false);
-        setup(31, "road05", false);
-        setup(32, "road06", false);
-        setup(33, "road07", false);
-        setup(34, "road08", false);
-        setup(35, "road09", false);
-        setup(36, "road10", false);
-        setup(37, "road11", false);
-        setup(38, "road12", false);
-        setup(39, "earth", false);
-        setup(40, "wall", true);
-        setup(41, "tree", true);
-        setup(42, "hut", false);
-        setup(43, "floor01", false);
-        setup(44, "table01", true);
-
-        createPaletteButtons();
-    }
-
-    private void setup(int id, String name, boolean hasCollision) {
-        TileInfo tile = new TileInfo(name, hasCollision);
-        tileSet.put(id, tile);
-
-        try {
-            String imagePath = tilesFolder + name + ".png";
-            File imageFile = new File(imagePath);
-            if (imageFile.exists()) {
-                tile.image = ImageIO.read(imageFile);
-            } else {
-                System.out.println("警告: 图像文件不存在: " + imagePath);
-            }
-        } catch (IOException e) {
-            System.out.println("无法加载图像: " + name + ".png");
-        }
+        entityEntries.removeIf(entry -> entry.getX() == x && entry.getY() == y);
+        setDirty(true);
     }
 
     private void createPaletteButtons() {
@@ -823,26 +1016,26 @@ public class MapEditor extends JFrame {
 
         for (int i = 0; i <= 44; i++) {
             final int tileId = i;
-            TileInfo tile = tileSet.get(tileId);
+            TileInfo tile = tileSet.getTile(tileId);
             if (tile == null)
                 continue;
 
-            JButton tileButton = new JButton(tile.name);
+            JButton tileButton = new JButton(tile.getName());
             tileButton.setVerticalTextPosition(SwingConstants.BOTTOM);
             tileButton.setHorizontalTextPosition(SwingConstants.CENTER);
             tileButton.setPreferredSize(new Dimension(80, 90));
             tileButton.setFont(new Font("Arial", Font.PLAIN, 11));
-            tileButton.setToolTipText("ID: " + tileId + " - " + tile.name +
-                    " | 碰撞: " + (tile.hasCollision ? "有" : "无"));
+            tileButton.setToolTipText("ID: " + tileId + " - " + tile.getName() +
+                    " | 碰撞: " + (tile.hasCollision() ? "有" : "无"));
 
             // 设置图像预览（优先使用真实图像，若无使用颜色块）
-            if (tile.image != null) {
-                Image img = tile.image.getScaledInstance(56, 56, Image.SCALE_SMOOTH);
+            if (tile.getImage() != null) {
+                Image img = tile.getImage().getScaledInstance(56, 56, Image.SCALE_SMOOTH);
                 tileButton.setIcon(new ImageIcon(img));
             } else {
                 BufferedImage bi = new BufferedImage(56, 56, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2 = bi.createGraphics();
-                g2.setColor(tile.displayColor);
+                g2.setColor(tile.getDisplayColor());
                 g2.fillRect(0, 0, 56, 56);
                 g2.setColor(Color.BLACK);
                 g2.drawRect(0, 0, 55, 55);
@@ -874,31 +1067,31 @@ public class MapEditor extends JFrame {
 
         for (int i = 0; i <= 44; i++) {
             final int tileId = i;
-            TileInfo tile = tileSet.get(tileId);
+            TileInfo tile = tileSet.getTile(tileId);
             if (tile == null)
                 continue;
 
             if (filter != null && !filter.isEmpty() &&
-                    !tile.name.toLowerCase().contains(filter.toLowerCase()) &&
+                    !tile.getName().toLowerCase().contains(filter.toLowerCase()) &&
                     !String.valueOf(tileId).contains(filter)) {
                 continue;
             }
 
-            JButton tileButton = new JButton(tile.name);
+            JButton tileButton = new JButton(tile.getName());
             tileButton.setVerticalTextPosition(SwingConstants.BOTTOM);
             tileButton.setHorizontalTextPosition(SwingConstants.CENTER);
             tileButton.setPreferredSize(new Dimension(80, 90));
             tileButton.setFont(new Font("Arial", Font.PLAIN, 11));
-            tileButton.setToolTipText("ID: " + tileId + " - " + tile.name +
-                    " | 碰撞: " + (tile.hasCollision ? "有" : "无"));
+            tileButton.setToolTipText("ID: " + tileId + " - " + tile.getName() +
+                    " | 碰撞: " + (tile.hasCollision() ? "有" : "无"));
 
-            if (tile.image != null) {
-                Image img = tile.image.getScaledInstance(56, 56, Image.SCALE_SMOOTH);
+            if (tile.getImage() != null) {
+                Image img = tile.getImage().getScaledInstance(56, 56, Image.SCALE_SMOOTH);
                 tileButton.setIcon(new ImageIcon(img));
             } else {
                 BufferedImage bi = new BufferedImage(56, 56, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2 = bi.createGraphics();
-                g2.setColor(tile.displayColor);
+                g2.setColor(tile.getDisplayColor());
                 g2.fillRect(0, 0, 56, 56);
                 g2.setColor(Color.BLACK);
                 g2.drawRect(0, 0, 55, 55);
@@ -942,22 +1135,6 @@ public class MapEditor extends JFrame {
         }
     }
 
-    private void handleTileClick(MouseEvent e, int x, int y) {
-        if (SwingUtilities.isRightMouseButton(e)) {
-            int tileId = mapData[y][x];
-            TileInfo tile = tileSet.get(tileId);
-            if (tile != null) {
-                selectedTile = tileId;
-                updateSelectedTileButton();
-                updateStatus();
-            }
-        } else {
-            mapData[y][x] = selectedTile;
-            tilePanels[y][x].repaint();
-            updateStatus();
-        }
-    }
-
     private void refreshMapDisplay() {
         if (mapPanel != null) {
             mapPanel.revalidate();
@@ -966,42 +1143,12 @@ public class MapEditor extends JFrame {
     }
 
     private void setupKeyboardShortcuts() {
-        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = getRootPane().getActionMap();
+        // 获取整个窗口的输入映射和动作映射
+        InputMap inputMap = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = this.getRootPane().getActionMap();
 
-        inputMap.put(KeyStroke.getKeyStroke("control S"), "save");
-        actionMap.put("save", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveMapAction();
-            }
-        });
-
-        inputMap.put(KeyStroke.getKeyStroke("control O"), "open");
-        actionMap.put("open", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadMapAction();
-            }
-        });
-
-        inputMap.put(KeyStroke.getKeyStroke("control N"), "new");
-        actionMap.put("new", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                newMapAction();
-            }
-        });
-
-        inputMap.put(KeyStroke.getKeyStroke("control shift S"), "saveAs");
-        actionMap.put("saveAs", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveMapAsAction();
-            }
-        });
-
-        inputMap.put(KeyStroke.getKeyStroke("control Z"), "undo");
+        // 为撤销操作设置快捷键 Ctrl+Z
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), "undo");
         actionMap.put("undo", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1009,7 +1156,8 @@ public class MapEditor extends JFrame {
             }
         });
 
-        inputMap.put(KeyStroke.getKeyStroke("control Y"), "redo");
+        // 为重做操作设置快捷键 Ctrl+Y
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), "redo");
         actionMap.put("redo", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1017,53 +1165,54 @@ public class MapEditor extends JFrame {
             }
         });
 
-        inputMap.put(KeyStroke.getKeyStroke("control C"), "toggleCoords");
-        actionMap.put("toggleCoords", new AbstractAction() {
+        // 其他快捷键...
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "save");
+        actionMap.put("save", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showCoordinates = !showCoordinates;
-                if (coordsButton != null) {
-                    coordsButton.setSelected(showCoordinates);
-                }
-                refreshMapDisplay();
-                updateStatus("坐标显示: " + (showCoordinates ? "开启" : "关闭"));
+                saveMapAction();
             }
         });
 
-        inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "clearSelection");
-        actionMap.put("clearSelection", new AbstractAction() {
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK), "open");
+        actionMap.put("open", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                clearSelection();
+                loadMapAction();
             }
         });
 
-        inputMap.put(KeyStroke.getKeyStroke("control M"), "toggleMouseMode");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK), "new");
+        actionMap.put("new", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                newMapAction();
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
+                "saveAs");
+        actionMap.put("saveAs", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveMapAsAction();
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK), "toggleMouseMode");
         actionMap.put("toggleMouseMode", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // 查找并选择鼠标模式单选按钮
-                for (Component comp : ((JPanel) toolbar.getComponent(2)).getComponents()) {
-                    if (comp instanceof JRadioButton && ((JRadioButton) comp).getText().equals("鼠标模式")) {
-                        ((JRadioButton) comp).setSelected(true);
-                        break;
-                    }
-                }
+                mouseModeRadio.setSelected(true);
             }
         });
 
         // 实体编辑模式快捷键
-        inputMap.put(KeyStroke.getKeyStroke("E"), "toggleEntityMode");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, 0), "toggleEntityMode");
         actionMap.put("toggleEntityMode", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // 查找并选择实体编辑模式单选按钮
-                for (Component comp : ((JPanel) toolbar.getComponent(2)).getComponents()) {
-                    if (comp instanceof JRadioButton && ((JRadioButton) comp).getText().equals("实体编辑模式")) {
-                        ((JRadioButton) comp).setSelected(true);
-                        break;
-                    }
-                }
+                entityModeRadio.setSelected(true);
             }
         });
     }
@@ -1087,37 +1236,46 @@ public class MapEditor extends JFrame {
             entityEntries.clear();
 
             // 读取地图数据
-            while ((line = reader.readLine()) != null && y < MAP_HEIGHT) {
-                if (line.trim().equals("#Entity")) {
+            boolean readingEntities = false;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+
+                // 跳过空行和注释行（除非是在读取实体部分）
+                if (line.isEmpty() || line.startsWith("#")) {
+                    if (line.equals("#Entity")) {
+                        readingEntities = true;
+                        continue;
+                    }
+                    // 如果不是实体标记且不在实体部分，则跳过
+                    if (!readingEntities) {
+                        continue;
+                    }
+                }
+
+                if (readingEntities) {
                     // 读取实体数据
-                    while ((line = reader.readLine()) != null) {
-                        line = line.trim();
-                        if (line.isEmpty() || line.startsWith("#"))
-                            continue;
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        String category = parts[0].trim();
+                        String type = parts[1].trim();
+                        int x = Integer.parseInt(parts[2].trim());
+                        int yy = Integer.parseInt(parts[3].trim());
+                        String extra = parts.length > 4 ? parts[4].trim() : null;
 
-                        String[] parts = line.split(",");
-                        if (parts.length >= 4) {
-                            String category = parts[0].trim();
-                            String type = parts[1].trim();
-                            int x = Integer.parseInt(parts[2].trim());
-                            int yy = Integer.parseInt(parts[3].trim());
-                            String extra = parts.length > 4 ? parts[4].trim() : null;
-
-                            entityEntries.add(new EntityEntry(category, type, x, yy, extra));
+                        entityEntries.add(new EntityEntry(category, type, x, yy, extra));
+                    }
+                } else if (y < MAP_HEIGHT) {
+                    // 读取地图数据
+                    String[] numbers = line.split("\\s+");
+                    for (int x = 0; x < Math.min(numbers.length, MAP_WIDTH); x++) {
+                        try {
+                            mapData[y][x] = Integer.parseInt(numbers[x]);
+                        } catch (NumberFormatException e) {
+                            mapData[y][x] = 0;
                         }
                     }
-                    break;
+                    y++;
                 }
-
-                String[] numbers = line.trim().split("\\s+");
-                for (int x = 0; x < Math.min(numbers.length, MAP_WIDTH); x++) {
-                    try {
-                        mapData[y][x] = Integer.parseInt(numbers[x]);
-                    } catch (NumberFormatException e) {
-                        mapData[y][x] = 0;
-                    }
-                }
-                y++;
             }
 
             reader.close();
@@ -1169,6 +1327,9 @@ public class MapEditor extends JFrame {
             mapFilePathField.setText(new File(filename).getName());
             updateStatus("地图已保存: " + new File(filename).getName());
 
+            // 添加这两行
+            setDirty(false);
+
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this,
                     "保存地图失败: " + e.getMessage(),
@@ -1196,11 +1357,11 @@ public class MapEditor extends JFrame {
         }
     }
 
-    private void saveMapAction() {
+    void saveMapAction() {
         saveMap(currentMapFile);
     }
 
-    private void saveMapAsAction() {
+    void saveMapAsAction() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(mapsFolder));
         fileChooser.setDialogTitle("另存为地图文件");
@@ -1221,6 +1382,8 @@ public class MapEditor extends JFrame {
                 filename += ".txt";
             }
             saveMap(filename);
+            // 更新UI显示
+            mapFilePathField.setText(new File(filename).getName());
         }
     }
 
@@ -1239,7 +1402,7 @@ public class MapEditor extends JFrame {
                     newName += ".txt";
                 }
                 currentMapFile = mapsFolder + newName;
-                mapFilePathField.setText(newName);
+                mapFilePathField.setText(newName); // 更新UI显示
                 undoStack.clear();
                 redoStack.clear();
                 updateStatus("新建地图: " + newName);
@@ -1257,11 +1420,12 @@ public class MapEditor extends JFrame {
         entityEntries.clear();
         refreshMapDisplay();
         updateStatus("地图已清空");
+        setDirty(true); // 添加这一行
     }
 
     private void updateStatus() {
         String modeText;
-        if (entityEditToggle != null && entityEditToggle.isSelected()) {
+        if (entityModeRadio.isSelected()) {
             modeText = "实体编辑模式";
         } else if (mouseMode) {
             modeText = "鼠标模式";
@@ -1272,10 +1436,10 @@ public class MapEditor extends JFrame {
         }
 
         if (selectedTile >= 0 && !modeText.equals("实体编辑模式")) {
-            TileInfo tile = tileSet.get(selectedTile);
+            TileInfo tile = tileSet.getTile(selectedTile);
             if (tile != null) {
-                String status = "模式: " + modeText + " | 选中: ID=" + selectedTile + " 名称=" + tile.name +
-                        " 碰撞=" + (tile.hasCollision ? "有" : "无") +
+                String status = "模式: " + modeText + " | 选中: ID=" + selectedTile + " 名称=" + tile.getName() +
+                        " 碰撞=" + (tile.hasCollision() ? "有" : "无") +
                         " | 地图: " + new File(currentMapFile).getName() +
                         " | 实体数: " + entityEntries.size() +
                         " | 撤销栈: " + undoStack.size() + " 重做栈: " + redoStack.size();
@@ -1301,6 +1465,39 @@ public class MapEditor extends JFrame {
             e.printStackTrace();
         }
 
-        SwingUtilities.invokeLater(() -> new MapEditor());
+        SwingUtilities.invokeLater(() -> {
+            // 启动主窗口管理器而不是直接启动MapEditor
+            new MapEditorManager().setVisible(true);
+        });
+    }
+
+    private EntityEntry getEntityAt(int x, int y) {
+        for (EntityEntry entry : entityEntries) {
+            if (entry.getX() == x && entry.getY() == y) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    public String getCurrentMapFile() {
+        return currentMapFile;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    private void setDirty(boolean dirty) {
+        this.dirty = dirty;
+
+        // 通知 manager 更新选项卡标题
+        if (manager != null) {
+            manager.notifyEditorChanged(this);
+        }
+    }
+
+    public void setTabIndex(int index) {
+        this.tabIndex = index;
     }
 }
