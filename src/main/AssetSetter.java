@@ -1,291 +1,345 @@
 package main;
 
-import entity.NPC_BigRock;
-import entity.NPC_Merchant;
-import entity.NPC_OldMan;
-import monster.MON_GreenSlime;
-import monster.MON_RedSlime;
-import monster.MON_SkeletonLord;
-import monster.MON_Bat;
-import monster.MON_Orc;
+import entity.*;
+import monster.*;
 import object.*;
-import tile_interactive.IT_DestructibleWall;
-import tile_interactive.IT_DryTree;
-import tile_interactive.IT_MetalPlate;
+import tile_interactive.*;
 
-/*
-        不要格式化这个源代码，不好看
-*/
+import java.io.*;
+import java.util.*;
 
 public class AssetSetter {
 
     GamePanel gp;
+    private List<EntityData>[] entityData;
+
+    // 存储实体数据的内部类
+    private static class EntityData {
+        String category;
+        String typeName;
+        int x;
+        int y;
+        String extra;
+
+        EntityData(String category, String typeName, int x, int y, String extra) {
+            this.category = category;
+            this.typeName = typeName;
+            this.x = x;
+            this.y = y;
+            this.extra = extra;
+        }
+    }
 
     public AssetSetter(GamePanel gp) {
         this.gp = gp;
+        // 初始化实体数据数组
+        entityData = new ArrayList[gp.maxMap];
+        for (int i = 0; i < gp.maxMap; i++) {
+            entityData[i] = new ArrayList<>();
+        }
+
+        // 加载所有地图的实体数据
+        loadAllMapEntities();
     }
 
+    // 加载所有地图的实体数据
+    private void loadAllMapEntities() {
+        // 根据TileManager中的地图加载顺序来加载实体
+        String[] mapFiles = {
+                "/maps/worldV3.txt",
+                "/maps/interior01.txt",
+                "/maps/mydungeon01.txt",
+                "/maps/mydungeon02.txt"
+        };
+
+        for (int i = 0; i < Math.min(gp.maxMap, mapFiles.length); i++) {
+            loadMapEntities(mapFiles[i], i);
+        }
+    }
+
+    // 从地图文件中加载实体数据
+    public void loadMapEntities(String filepath, int mapIndex) {
+        try {
+            // 清空之前的数据
+            entityData[mapIndex].clear();
+
+            InputStream is = getClass().getResourceAsStream(filepath);
+            if (is == null) {
+                System.err.println("无法找到地图文件: " + filepath);
+                return;
+            }
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            String line;
+            boolean entitySection = false;
+
+            // 读取文件直到找到#Entity标记
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+
+                if (line.equals("#Entity")) {
+                    entitySection = true;
+                    continue;
+                }
+
+                // 如果进入了实体部分，则解析实体数据
+                if (entitySection) {
+                    if (line.isEmpty() || line.startsWith("#")) {
+                        continue; // 跳过空行和注释行
+                    }
+
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        String category = parts[0].trim();
+                        String typeName = parts[1].trim();
+                        int x = Integer.parseInt(parts[2].trim());
+                        int y = Integer.parseInt(parts[3].trim());
+                        String extra = parts.length > 4 ? parts[4].trim() : null;
+
+                        entityData[mapIndex].add(new EntityData(category, typeName, x, y, extra));
+                    }
+                }
+            }
+
+            br.close();
+        } catch (Exception e) {
+            System.err.println("加载地图实体时出错: " + filepath);
+            e.printStackTrace();
+        }
+    }
+
+    // 加载所有类型的实体
+    public void setAll() {
+        setObject();
+        setNPC();
+        setMonster();
+        setInteractiveTile();
+    }
+
+    // 加载OBJ类实体
     public void setObject() {
-        int mapNum = 0;
-        int i = 0;
-        gp.obj[mapNum][i] = new OBJ_Coin_Bronze(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 25;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 19;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Key(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 21;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 19;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Tent(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 19;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 20;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Key(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 26;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 21;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Axe(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 33;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 21;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Shield_Blue(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 35;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 21;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Potion_Red(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 22;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 27;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Potion_Red(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 22;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 29;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_ManaCrystal(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 22;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 31;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Door(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 14;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 28;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Door(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 12;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 12;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Chest(gp);
-        gp.obj[mapNum][i].SetLoot(new OBJ_Key(gp));
-        gp.obj[mapNum][i].worldX = gp.tileSize * 30;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 29;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Chest(gp);
-        gp.obj[mapNum][i].SetLoot(new OBJ_Tent(gp));
-        gp.obj[mapNum][i].worldX = gp.tileSize * 17;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 20;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Chest(gp);
-        gp.obj[mapNum][i].SetLoot(new OBJ_Potion_Red(gp));
-        gp.obj[mapNum][i].worldX = gp.tileSize * 16;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 20;
-        i++;
-        // lantern
-        gp.obj[mapNum][i] = new OBJ_Lantern(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 18;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 20;
-        i++;
+        for (int mapNum = 0; mapNum < gp.maxMap; mapNum++) {
+            int index = 0;
+            for (EntityData data : entityData[mapNum]) {
+                if (!data.category.equals("OBJ"))
+                    continue;
 
-        mapNum = 2;
-        i = 0;
-        // dungeon右下角的宝箱放一个pickaxe
-        gp.obj[mapNum][i] = new OBJ_Chest(gp);
-        gp.obj[mapNum][i].SetLoot(new OBJ_Pickaxe(gp));
-        gp.obj[mapNum][i].worldX = gp.tileSize * 40;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 41;
-        i++;
-        // 下面三个dungeon的宝箱用来占位，我还不知道放什么战利品
-        gp.obj[mapNum][i] = new OBJ_Chest(gp);
-        gp.obj[mapNum][i].SetLoot(new OBJ_Potion_Red(gp));
-        gp.obj[mapNum][i].worldX = gp.tileSize * 13;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 16;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Chest(gp);
-        gp.obj[mapNum][i].SetLoot(new OBJ_Potion_Red(gp));
-        gp.obj[mapNum][i].worldX = gp.tileSize * 26;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 34;
-        i++;
-        gp.obj[mapNum][i] = new OBJ_Chest(gp);
-        gp.obj[mapNum][i].SetLoot(new OBJ_Potion_Red(gp));
-        gp.obj[mapNum][i].worldX = gp.tileSize * 27;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 15;
-        i++;
+                if (index >= gp.obj[mapNum].length) {
+                    System.err.println("地图 " + mapNum + " 的OBJ实体数组已满");
+                    break;
+                }
 
-        // dungeon 的大铁门
-        gp.obj[mapNum][i] = new OBJ_Door_Iron(gp);
-        gp.obj[mapNum][i].worldX = gp.tileSize * 18;
-        gp.obj[mapNum][i].worldY = gp.tileSize * 23;
-        i++;
+                Entity obj = createObject(data.typeName);
+                if (obj != null) {
+                    obj.worldX = data.x * gp.tileSize;
+                    obj.worldY = data.y * gp.tileSize;
 
+                    // 特殊处理箱子
+                    if (obj instanceof OBJ_Chest && data.extra != null && !data.extra.isEmpty()) {
+                        Entity loot = createObject(data.extra);
+                        if (loot != null) {
+                            ((OBJ_Chest) obj).SetLoot(loot);
+                        } else {
+                            System.err.println("无法创建箱子内的物品: " + data.extra + " 在位置 (" + data.x + ", " + data.y + ")");
+                        }
+                    }
+
+                    gp.obj[mapNum][index] = obj;
+                    index++;
+                }
+            }
+        }
     }
 
+    // 加载NPC类实体
     public void setNPC() {
-        int mapNum = 0;
-        int i = 0;
+        for (int mapNum = 0; mapNum < gp.maxMap; mapNum++) {
+            int index = 0;
+            for (EntityData data : entityData[mapNum]) {
+                if (!data.category.equals("NPC"))
+                    continue;
 
-        // map 0
-        gp.npc[mapNum][i] = new NPC_OldMan(gp);
-        gp.npc[mapNum][i].worldX = gp.tileSize * 21;
-        gp.npc[mapNum][i].worldY = gp.tileSize * 21;
+                if (index >= gp.npc[mapNum].length) {
+                    System.err.println("地图 " + mapNum + " 的NPC实体数组已满");
+                    break;
+                }
 
-        // map 1
-        mapNum = 1;
-        i = 0;
-        gp.npc[mapNum][i] = new NPC_Merchant(gp);
-        gp.npc[mapNum][i].worldX = gp.tileSize * 12;
-        gp.npc[mapNum][i].worldY = gp.tileSize * 7;
+                Entity npc = createNPC(data.typeName);
+                if (npc != null) {
+                    npc.worldX = data.x * gp.tileSize;
+                    npc.worldY = data.y * gp.tileSize;
 
-        // dungeon 1
-        mapNum = 2;
-        i = 0;
-        gp.npc[mapNum][i] = new NPC_BigRock(gp);
-        gp.npc[mapNum][i].worldX = gp.tileSize * 20;
-        gp.npc[mapNum][i].worldY = gp.tileSize * 25;
-        i++;
-        gp.npc[mapNum][i] = new NPC_BigRock(gp);
-        gp.npc[mapNum][i].worldX = gp.tileSize * 11;
-        gp.npc[mapNum][i].worldY = gp.tileSize * 18;
-        i++;
-        gp.npc[mapNum][i] = new NPC_BigRock(gp);
-        gp.npc[mapNum][i].worldX = gp.tileSize * 23;
-        gp.npc[mapNum][i].worldY = gp.tileSize * 14;
-        i++;
+                    gp.npc[mapNum][index] = npc;
+                    index++;
+                }
+            }
+        }
     }
 
+    // 加载Monster类实体
     public void setMonster() {
-        int mapNum = 0;
-        int i = 0;
-        gp.monster[mapNum][i] = new MON_GreenSlime(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 21;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 38;
-        i++;
-        gp.monster[mapNum][i] = new MON_GreenSlime(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 23;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 42;
-        i++;
-        gp.monster[mapNum][i] = new MON_GreenSlime(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 24;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 37;
-        i++;
-        gp.monster[mapNum][i] = new MON_GreenSlime(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 34;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 42;
-        i++;
-        gp.monster[mapNum][i] = new MON_GreenSlime(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 38;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 42;
-        i++;
-        gp.monster[mapNum][i] = new MON_Orc(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 12;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 33;
-        i++;
+        for (int mapNum = 0; mapNum < gp.maxMap; mapNum++) {
+            int index = 0;
+            for (EntityData data : entityData[mapNum]) {
+                if (!data.category.equals("MON"))
+                    continue;
 
-        mapNum = 2;
-        i++;
-        gp.monster[mapNum][i] = new MON_Bat(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 34;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 39;
-        i++;
-        gp.monster[mapNum][i] = new MON_Bat(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 36;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 25;
-        i++;
-        gp.monster[mapNum][i] = new MON_Bat(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 39;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 26;
-        i++;
-        gp.monster[mapNum][i] = new MON_Bat(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 28;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 11;
-        i++;
-        gp.monster[mapNum][i] = new MON_Bat(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 10;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 19;
-        i++;
+                if (index >= gp.monster[mapNum].length) {
+                    System.err.println("地图 " + mapNum + " 的Monster实体数组已满");
+                    break;
+                }
 
-        mapNum = 3;
-        gp.monster[mapNum][i] = new MON_SkeletonLord(gp);
-        gp.monster[mapNum][i].worldX = gp.tileSize * 23;
-        gp.monster[mapNum][i].worldY = gp.tileSize * 16;
-        i++;
+                Entity monster = createMonster(data.typeName);
+                if (monster != null) {
+                    monster.worldX = data.x * gp.tileSize;
+                    monster.worldY = data.y * gp.tileSize;
+
+                    gp.monster[mapNum][index] = monster;
+                    index++;
+                }
+            }
+        }
     }
 
+    // 加载InteractiveTile类实体
     public void setInteractiveTile() {
-        int mapNum = 0;
-        int i = 0;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 27, 12); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 28, 12); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 29, 12); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 30, 12); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 31, 12); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 32, 12); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 33, 12); i++;
+        for (int mapNum = 0; mapNum < gp.maxMap; mapNum++) {
+            int index = 0;
+            for (EntityData data : entityData[mapNum]) {
+                if (!data.category.equals("IT"))
+                    continue;
 
-        // gp.iTile[mapNum][i] = new IT_DryTree(gp, 30, 20);
-        // i++;
-        // gp.iTile[mapNum][i] = new IT_DryTree(gp, 30, 21);
-        // i++;
-        // gp.iTile[mapNum][i] = new IT_DryTree(gp, 30, 22);
-        // i++;
-        // gp.iTile[mapNum][i] = new IT_DryTree(gp, 20, 20);
-        // i++;
-        // gp.iTile[mapNum][i] = new IT_DryTree(gp, 20, 21);
-        // i++;
-        // gp.iTile[mapNum][i] = new IT_DryTree(gp, 20, 22);
-        // i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 22, 24); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 23, 24); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 24, 24); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 10, 40); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 10, 41); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 11, 41); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 12, 41); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 13, 41); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 13, 40); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 14, 40); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 15, 40); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 16, 40); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 17, 40); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 18, 40); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 25, 27); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 26, 27); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 27, 28); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 27, 29); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 27, 30); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 27, 31); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 28, 31); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 29, 31); i++;
-        gp.iTile[mapNum][i] = new IT_DryTree(gp, 30, 31); i++;
-        
-        mapNum = 2;
-        i = 0;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 18, 30); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 17, 31); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 17, 32); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 18, 34); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 18, 33); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 10, 22); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 10, 24); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 38, 18); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 38, 19); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 38, 20); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 38, 21); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 18, 13); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 18, 14); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 22, 28); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 30, 28); i++;
-        gp.iTile[mapNum][i] = new IT_DestructibleWall(gp, 32, 28); i++;
-        
-        gp.iTile[mapNum][i] = new IT_MetalPlate(gp, 20, 22); i++;
-        gp.iTile[mapNum][i] = new IT_MetalPlate(gp, 8, 17); i++;
-        gp.iTile[mapNum][i] = new IT_MetalPlate(gp, 39, 31); i++;
+                if (index >= gp.iTile[mapNum].length) {
+                    System.err.println("地图 " + mapNum + " 的InteractiveTile实体数组已满");
+                    break;
+                }
 
+                InteractiveTile iTile = createInteractiveTile(data.typeName, data.x, data.y);
+                if (iTile != null) {
+                    gp.iTile[mapNum][index] = iTile;
+                    index++;
+                }
+            }
+        }
+    }
+
+    // 创建OBJ对象
+    private Entity createObject(String typeName) {
+        try {
+            switch (typeName) {
+                case "OBJ_Boots":
+                    return new OBJ_Boots(gp);
+                case "OBJ_Chest":
+                    return new OBJ_Chest(gp);
+                case "OBJ_Axe":
+                    return new OBJ_Axe(gp);
+                case "OBJ_Coin_Bronze":
+                    return new OBJ_Coin_Bronze(gp);
+                case "OBJ_Door_Iron":
+                    return new OBJ_Door_Iron(gp);
+                case "OBJ_Door":
+                    return new OBJ_Door(gp);
+                case "OBJ_Heart":
+                    return new OBJ_Heart(gp);
+                case "OBJ_Lantern":
+                    return new OBJ_Lantern(gp);
+                case "OBJ_Fireball":
+                    return new OBJ_Fireball(gp);
+                case "OBJ_Key":
+                    return new OBJ_Key(gp);
+                case "OBJ_ManaCrystal":
+                    return new OBJ_ManaCrystal(gp);
+                case "OBJ_Pickaxe":
+                    return new OBJ_Pickaxe(gp);
+                case "OBJ_Potion_Red":
+                    return new OBJ_Potion_Red(gp);
+                case "OBJ_Rock":
+                    return new OBJ_Rock(gp);
+                case "OBJ_Shield_Blue":
+                    return new OBJ_Shield_Blue(gp);
+                case "OBJ_Shield_Wood":
+                    return new OBJ_Shield_Wood(gp);
+                case "OBJ_Sword_Normal":
+                    return new OBJ_Sword_Normal(gp);
+                case "OBJ_Tent":
+                    return new OBJ_Tent(gp);
+                default:
+                    System.err.println("未知的OBJ类型: " + typeName);
+                    return null;
+            }
+        } catch (Exception e) {
+            System.err.println("创建OBJ对象失败: " + typeName);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // 创建NPC对象
+    private Entity createNPC(String typeName) {
+        try {
+            switch (typeName) {
+                case "NPC_BigRock":
+                    return new NPC_BigRock(gp);
+                case "NPC_Merchant":
+                    return new NPC_Merchant(gp);
+                case "NPC_OldMan":
+                    return new NPC_OldMan(gp);
+                default:
+                    System.err.println("未知的NPC类型: " + typeName);
+                    return null;
+            }
+        } catch (Exception e) {
+            System.err.println("创建NPC对象失败: " + typeName);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // 创建Monster对象
+    private Entity createMonster(String typeName) {
+        try {
+            switch (typeName) {
+                case "MON_Bat":
+                    return new MON_Bat(gp);
+                case "MON_GreenSlime":
+                    return new MON_GreenSlime(gp);
+                case "MON_Orc":
+                    return new MON_Orc(gp);
+                case "MON_RedSlime":
+                    return new MON_RedSlime(gp);
+                case "MON_SkeletonLord":
+                    return new MON_SkeletonLord(gp);
+                default:
+                    System.err.println("未知的Monster类型: " + typeName);
+                    return null;
+            }
+        } catch (Exception e) {
+            System.err.println("创建Monster对象失败: " + typeName);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // 创建InteractiveTile对象
+    private InteractiveTile createInteractiveTile(String typeName, int x, int y) {
+        try {
+            switch (typeName) {
+                case "IT_DestructibleWall":
+                    return new IT_DestructibleWall(gp, x, y);
+                case "IT_DryTree":
+                    return new IT_DryTree(gp, x, y);
+                case "IT_MetalPlate":
+                    return new IT_MetalPlate(gp, x, y);
+                case "IT_Trunk":
+                    return new IT_Trunk(gp, x, y);
+                default:
+                    System.err.println("未知的InteractiveTile类型: " + typeName);
+                    return null;
+            }
+        } catch (Exception e) {
+            System.err.println("创建InteractiveTile对象失败: " + typeName);
+            e.printStackTrace();
+            return null;
+        }
     }
 }

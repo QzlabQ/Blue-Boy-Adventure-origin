@@ -105,6 +105,7 @@ public class Player extends Entity {
         inventory.add(currentWeapon);
         inventory.add(currentShield);
         inventory.add(new OBJ_Key(gp));
+        inventory.add(new OBJ_Key(gp));
         inventory.add(new OBJ_Lantern(gp));
 
     }
@@ -119,19 +120,21 @@ public class Player extends Entity {
     public int getDefense() {
         return defense = dexterity * currentShield.defenseValue;
     }
+
     public int getCurrentWeaponSlot() {
         int currentWeaponSlot = 0;
-        for(int i = 0; i < inventory.size(); i++){
-            if(inventory.get(i) == currentWeapon) {
+        for (int i = 0; i < inventory.size(); i++) {
+            if (inventory.get(i) == currentWeapon) {
                 currentWeaponSlot = i;
             }
         }
         return currentWeaponSlot;
     }
+
     public int getCurrentShieldSlot() {
         int currentShieldSlot = 0;
-        for(int i = 0; i < inventory.size(); i++){
-            if(inventory.get(i) == currentShield) {
+        for (int i = 0; i < inventory.size(); i++) {
+            if (inventory.get(i) == currentShield) {
                 currentShieldSlot = i;
             }
         }
@@ -239,19 +242,18 @@ public class Player extends Entity {
                 knockBack = false;
                 speed = defaultSpeed;
             }
-        }
-        else if (attacking == true) {
+        } else if (attacking == true) {
             attacking();
         } else if (keyH.spacePressed == true) {
             guarding = true;
-        } else if(offBalance == true){
+        } else if (offBalance == true) {
             offBalanceCounter++;
             // 60 is for 1 second
-            if(offBalanceCounter > 60){
+            if (offBalanceCounter > 60) {
                 offBalance = false;
                 offBalanceCounter = 0;
             }
-        }else if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true ||
+        } else if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true ||
                 keyH.rightPressed == true || keyH.enterPressed == true) {
             if (keyH.upPressed == true) {
                 direction = "up";
@@ -372,7 +374,7 @@ public class Player extends Entity {
         if (mana > maxMana) {
             mana = maxMana;
         }
-        if(keyH.godModeOn == false){
+        if (keyH.godModeOn == false) {
             if (life <= 0) {
                 gp.gameState = gp.gameOverState;
                 gp.ui.commandNum = -1;
@@ -421,7 +423,7 @@ public class Player extends Entity {
                 attackCanceled = true;
                 if (gp.npc[gp.currentMap][i] instanceof NPC_BigRock) {
                     gp.npc[gp.currentMap][i].move(direction);
-                } else{
+                } else {
                     gp.gameState = gp.dialogueState;
                     gp.npc[gp.currentMap][i].speak();
                     gp.playSE(7);
@@ -430,7 +432,6 @@ public class Player extends Entity {
             // gp.npc[gp.currentMap][i].move(direction);
 
         }
-
 
     }
 
@@ -463,7 +464,7 @@ public class Player extends Entity {
                     setKnockBack(gp.monster[gp.currentMap][i], attacker, knockBackPower);
                 }
                 // 玩法：格挡击退后迅速攻击，伤害*5倍
-                if(gp.monster[gp.currentMap][i].offBalance == true){
+                if (gp.monster[gp.currentMap][i].offBalance == true) {
                     attack *= 5;
                 }
                 int damage = attack - gp.monster[gp.currentMap][i].defense;
@@ -589,7 +590,7 @@ public class Player extends Entity {
 
         boolean canObtain = false;
 
-        Entity newItem  =gp.eGenerator.getObject(item.name);
+        Entity newItem = gp.eGenerator.getObject(item.name);
         // CHECK IF STACKABLE
         if (newItem.stackable == true) {
             int index = searchItemInInventory(item.name);
@@ -635,7 +636,7 @@ public class Player extends Entity {
                         image = attackUp2;
                     }
                 }
-                if(guarding == true){
+                if (guarding == true) {
                     image = guardUp;
                 }
                 break;
@@ -656,7 +657,7 @@ public class Player extends Entity {
                         image = attackDown2;
                     }
                 }
-                if(guarding == true){
+                if (guarding == true) {
                     image = guardDown;
                 }
                 break;
@@ -678,7 +679,7 @@ public class Player extends Entity {
                         image = attackLeft2;
                     }
                 }
-                if(guarding == true){
+                if (guarding == true) {
                     image = guardLeft;
                 }
                 break;
@@ -699,7 +700,7 @@ public class Player extends Entity {
                         image = attackRight2;
                     }
                 }
-                if(guarding == true){
+                if (guarding == true) {
                     image = guardRight;
                 }
                 break;

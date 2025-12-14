@@ -128,14 +128,14 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
-    public void resetGame(boolean restart){
+    public void resetGame(boolean restart) {
         currentArea = outside;
         player.setDefaultPositions();
         player.restoreStatus();
         aSetter.setMonster();
         aSetter.setNPC();
         player.resetCounter();
-        if(restart == true){
+        if (restart == true) {
             player.setDefaultValue();
             aSetter.setObject();
             aSetter.setInteractiveTile();
@@ -269,7 +269,7 @@ public class GamePanel extends JPanel implements Runnable {
             ui.draw(g2);
         }
         // MAP SCREEN
-        else if (gameState == mapState){
+        else if (gameState == mapState) {
             map.drawFullMapScreen(g2);
         }
         // OTHERS
@@ -376,16 +376,17 @@ public class GamePanel extends JPanel implements Runnable {
         se.setFile(i);
         se.play();
     }
-    public void changeArea(){
-        if(nextArea != currentArea){
+
+    public void changeArea() {
+        if (nextArea != currentArea) {
             stopMusic();
-            if(nextArea == outside){
+            if (nextArea == outside) {
                 playMusic(0);
             }
-            if(nextArea == indoor){
+            if (nextArea == indoor) {
                 playMusic(18);
             }
-            if(nextArea == dungeon){
+            if (nextArea == dungeon) {
                 playMusic(19);
             }
         }

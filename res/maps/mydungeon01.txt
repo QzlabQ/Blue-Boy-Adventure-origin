@@ -48,3 +48,41 @@
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+#Entity
+OBJ,OBJ_Chest,40,41,OBJ_Pickaxe
+OBJ,OBJ_Chest,13,16,OBJ_Potion_Red
+OBJ,OBJ_Chest,26,34,OBJ_Potion_Red
+OBJ,OBJ_Chest,27,15,OBJ_Potion_Red
+OBJ,OBJ_Door_Iron,18,23
+
+IT,IT_DestructibleWall,18,30
+IT,IT_DestructibleWall,17,31
+IT,IT_DestructibleWall,17,32
+IT,IT_DestructibleWall,18,34
+IT,IT_DestructibleWall,18,33
+IT,IT_DestructibleWall,10,22
+IT,IT_DestructibleWall,10,24
+IT,IT_DestructibleWall,38,18
+IT,IT_DestructibleWall,38,19
+IT,IT_DestructibleWall,38,20
+IT,IT_DestructibleWall,38,21
+IT,IT_DestructibleWall,18,13
+IT,IT_DestructibleWall,18,14
+IT,IT_DestructibleWall,22,28
+IT,IT_DestructibleWall,30,28
+IT,IT_DestructibleWall,32,28
+
+IT,IT_MetalPlate,20,22
+IT,IT_MetalPlate,8,17
+IT,IT_MetalPlate,39,31
+
+MON,MON_Bat,34,39
+MON,MON_Bat,36,25
+MON,MON_Bat,39,26
+MON,MON_Bat,28,11
+MON,MON_Bat,10,19
+
+NPC,NPC_BigRock,20,25
+NPC,NPC_BigRock,11,18
+NPC,NPC_BigRock,23,14
