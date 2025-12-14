@@ -54,20 +54,21 @@ public class EventHandler {
         }
 
         if (canTouchEvent == true) {
-            if (hit(0, 27, 16, "right") == true) {
-                damagePit(gp.dialogueState); // 这个pit没有贴图，可以考虑加上贴图，或者直接注释掉
-            } else if (hit(0, 23, 19, "any") == true) {
-                damagePit(gp.dialogueState);
-            } else if (hit(0, 23, 12, "up") == true) {
+            // if (hit(0, 27, 16, "right") == true) {
+            //     damagePit(gp.dialogueState); // 这个pit没有贴图，可以考虑加上贴图，或者直接注释掉
+            // } else if (hit(0, 23, 19, "any") == true) {
+            //     damagePit(gp.dialogueState);
+            // } else
+                 if (hit(0, 23, 12, "up") == true) {
                 healingPool(gp.dialogueState);
             } else if (hit(0, 10, 39, "any") == true) {
                 teleport(1, 12, 13, gp.indoor); // 商人小屋
             } else if (hit(1, 12, 13, "any") == true) {
                 teleport(0, 10, 39, gp.outside);
             } else if (hit(0,12,9,"any") == true) {
-                // 测试用
-                // teleport(3, 26, 41, gp.dungeon); // 主世界 传送到 dungeon02
-                teleport(2, 9, 41, gp.dungeon); // 主世界 传送到 dungeon01
+                
+                 teleport(3, 26, 41, gp.dungeon); // 主世界 传送到 dungeon02
+                // teleport(2, 9, 41, gp.dungeon); // 主世界 传送到 dungeon01
             }else if (hit(2,9,41,"any") == true) {
                 teleport(0, 12, 9, gp.outside); // dungeon01 传送到 主世界
             }else if (hit(2,8,7,"any") == true) {

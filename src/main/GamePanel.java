@@ -362,6 +362,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         music.setFile(i);
         music.play();
+        
         music.loop();
 
     }
