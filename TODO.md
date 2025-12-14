@@ -13,7 +13,7 @@
 11. fire ball lighting & damage(胡)
 12. delete career class（huang）
 13. 最小化后，key一直输入（有机会？）
-14. 增加assets editor
+14. 增加assets editor (已经完成，集成在MapEditor中；地图文件的格式也同步更新了)
 
 ## 提示
 

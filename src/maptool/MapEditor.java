@@ -431,21 +431,11 @@ public class MapEditor extends JFrame {
                                     g.drawOval(6, 6, TILE_SIZE - 12, TILE_SIZE - 12);
                                 }
 
-                                // 对于箱子，如果没有战利品则用红色高亮显示
-                                if (entityType.equals("OBJ_Chest")
-                                        && (entityExtra == null || entityExtra.isEmpty() || entityExtra.equals("无"))) {
-                                    // 用红色边框高亮显示没有战利品的箱子
-                                    g.setColor(Color.RED);
-                                    Graphics2D g2d = (Graphics2D) g;
-                                    g2d.setStroke(new BasicStroke(3));
-                                    g.drawRect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                                } else {
-                                    // 始终添加高亮效果，而不仅仅在实体编辑模式下
-                                    g.setColor(new Color(255, 255, 0, 100));
-                                    g.fillOval(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                                }
+                                // 始终添加高亮效果，而不仅仅在实体编辑模式下
+                                g.setColor(new Color(255, 255, 0, 100));
+                                g.fillOval(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
 
-                                // 重新绘制实体图像或绿色圆点
+                                // 重新绘制实体图像或绿色圆点（确保图像在高亮之上）
                                 if (entityImage != null) {
                                     int imgWidth = Math.min(TILE_SIZE - 8, entityImage.getWidth());
                                     int imgHeight = Math.min(TILE_SIZE - 8, entityImage.getHeight());
@@ -458,6 +448,27 @@ public class MapEditor extends JFrame {
                                     g.fillOval(6, 6, TILE_SIZE - 12, TILE_SIZE - 12);
                                     g.setColor(Color.BLACK);
                                     g.drawOval(6, 6, TILE_SIZE - 12, TILE_SIZE - 12);
+                                }
+
+                                // 对于箱子，如果没有战利品则用红色高亮显示
+                                if (entityType.equals("OBJ_Chest")
+                                        && (entityExtra == null || entityExtra.isEmpty() || entityExtra.equals("无"))) {
+                                    // 用红色边框高亮显示没有战利品的箱子
+                                    g.setColor(Color.RED);
+                                    Graphics2D g2d = (Graphics2D) g;
+                                    g2d.setStroke(new BasicStroke(3));
+                                    g.drawRect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
+
+                                    // 添加红色感叹号警告图标（覆盖在箱子图像上方）
+                                    g.setColor(Color.RED);
+                                    Font oldFont = g.getFont();
+                                    g.setFont(new Font("Arial", Font.BOLD, 20));
+                                    FontMetrics fm = g.getFontMetrics();
+                                    String warning = "!";
+                                    int textWidth = fm.stringWidth(warning);
+                                    int textHeight = fm.getAscent();
+                                    g.drawString(warning, (TILE_SIZE - textWidth) / 2, (TILE_SIZE + textHeight) / 2);
+                                    g.setFont(oldFont);
                                 }
                             }
                         }
@@ -656,10 +667,13 @@ public class MapEditor extends JFrame {
                             "\n实体编辑模式：\n" +
                             "• 左键添加实体，右键删除实体\n" +
                             "\n快捷键：\n" +
-                            "• 撤销/重做：Ctrl+Z/Ctrl+Y\n" +
+                            "• 撤销：Ctrl+Z\n" +
+                            "• 重做：Ctrl+Y\n" +
+                            "\n显示特性：\n" +
                             "• ID始终显示在方块左上角\n" +
-                            "• 碰撞方块有红色标记\n",
-                    "操作指南",
+                            "• 有碰撞体积的方块右上角有红色标记\n" +
+                            "• 不合法的实体会有红框警告\n",
+                    "帮助",
                     JOptionPane.INFORMATION_MESSAGE);
         });
 
@@ -725,24 +739,40 @@ public class MapEditor extends JFrame {
 
         tilePalettePanel = new JPanel();
         tilePalettePanel.setLayout(new GridLayout(0, 4, 3, 3));
+        
+        // 设置首选尺寸以确保滚动条能正常工作
+        // 计算所需高度：每个按钮85像素高，每行4个按钮，共45个按钮需要约12行
+        int requiredHeight = (int) Math.ceil(45.0 / 4) * 90; // 每个按钮高度+垂直间距
+        int requiredWidth = 4 * 80; // 每个按钮宽度+水平间距
+        tilePalettePanel.setPreferredSize(new Dimension(requiredWidth, requiredHeight));
+        tilePalettePanel.setBackground(Color.WHITE); // 设置背景色使面板更清晰可见
 
         JScrollPane paletteScrollPane = new JScrollPane(tilePalettePanel);
         paletteScrollPane.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
         // 提高调色板滚动速度
         paletteScrollPane.getVerticalScrollBar().setUnitIncrement(20);
         paletteScrollPane.getVerticalScrollBar().setBlockIncrement(100);
+        // 确保视口能正确追踪内容尺寸变化
+        paletteScrollPane.getViewport().setBackground(Color.WHITE);
+        // 明确设置滚动条策略
+        paletteScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        paletteScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         // 实体编辑面板 (初始化类成员变量)
         entityPanel = new JPanel(new BorderLayout(5, 5));
         entityPanel.setBorder(BorderFactory.createTitledBorder("实体编辑"));
         entityPanel.setVisible(false); // 默认隐藏
 
+        // 创建一个专门用于容纳调色板相关组件的面板
+        JPanel paletteContainer = new JPanel(new BorderLayout());
+        paletteContainer.add(paletteHeader, BorderLayout.NORTH);
+        paletteContainer.add(paletteScrollPane, BorderLayout.CENTER);
+        
         // 修改 modePanel 的事件监听器，添加显示/隐藏逻辑
         editModeRadio.addActionListener(e -> {
             setEditMode();
             // 显示方块调色板，隐藏实体面板
-            paletteHeader.setVisible(true);
-            paletteScrollPane.setVisible(true);
+            paletteContainer.setVisible(true);
             entityPanel.setVisible(false);
             rightPanel.revalidate();
             rightPanel.repaint();
@@ -751,8 +781,7 @@ public class MapEditor extends JFrame {
         mouseModeRadio.addActionListener(e -> {
             setMouseMode();
             // 隐藏方块调色板和实体面板
-            paletteHeader.setVisible(false);
-            paletteScrollPane.setVisible(false);
+            paletteContainer.setVisible(false);
             entityPanel.setVisible(false);
             rightPanel.revalidate();
             rightPanel.repaint();
@@ -761,16 +790,14 @@ public class MapEditor extends JFrame {
         entityModeRadio.addActionListener(e -> {
             setEntityMode();
             // 隐藏方块调色板，显示实体面板
-            paletteHeader.setVisible(false);
-            paletteScrollPane.setVisible(false);
+            paletteContainer.setVisible(false);
             entityPanel.setVisible(true);
             rightPanel.revalidate();
             rightPanel.repaint();
         });
 
         // 初始化时根据默认模式设置可见性
-        paletteHeader.setVisible(true);
-        paletteScrollPane.setVisible(true);
+        paletteContainer.setVisible(true);
         entityPanel.setVisible(false);
 
         JPanel entityTop = new JPanel(new GridLayout(4, 1, 3, 3));
@@ -796,7 +823,7 @@ public class MapEditor extends JFrame {
                 "OBJ_ManaCrystal", "OBJ_Pickaxe", "OBJ_Potion_Red", "OBJ_Rock",
                 "OBJ_Shield_Blue", "OBJ_Sword_Normal", "OBJ_Tent"
         };
-        
+
         // 创建带图标的支持渲染的combobox
         typeCombo = new JComboBox<>(entityTypes);
         typeCombo.setPreferredSize(new Dimension(200, 30)); // 设置下拉框尺寸
@@ -805,11 +832,11 @@ public class MapEditor extends JFrame {
             public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                     boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                
+
                 if (value instanceof String) {
                     String entityType = (String) value;
                     setText(entityType);
-                    
+
                     // 获取实体图像
                     BufferedImage entityImage = entityImages.getImage(entityType);
                     if (entityImage != null) {
@@ -820,11 +847,11 @@ public class MapEditor extends JFrame {
                         setIcon(null);
                     }
                 }
-                
+
                 return this;
             }
         });
-        
+
         typeCombo.addActionListener(e -> {
             selectedEntityType = (String) typeCombo.getSelectedItem();
             String category = determineCategory(selectedEntityType);
@@ -880,13 +907,13 @@ public class MapEditor extends JFrame {
             public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                     boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                
+
                 if (value instanceof String) {
                     String entityType = (String) value;
                     // 对于"无"选项不显示图标
                     if (!entityType.equals("无")) {
                         setText(entityType);
-                        
+
                         // 获取实体图像
                         BufferedImage entityImage = entityImages.getImage(entityType);
                         if (entityImage != null) {
@@ -901,7 +928,7 @@ public class MapEditor extends JFrame {
                         setIcon(null); // "无"选项不显示图标
                     }
                 }
-                
+
                 return this;
             }
         });
@@ -954,9 +981,9 @@ public class MapEditor extends JFrame {
         });
         entityPanel.add(clearEntitiesBtn, BorderLayout.SOUTH);
 
-        rightPanel.add(entityPanel, BorderLayout.NORTH); // 将实体编辑面板移到上方
-        rightPanel.add(paletteHeader, BorderLayout.CENTER); // 调整方块调色板位置
-        rightPanel.add(paletteScrollPane, BorderLayout.SOUTH); // 调整方块调色板滚动面板位置
+        // 调整组件添加顺序和方式
+        rightPanel.add(entityPanel, BorderLayout.NORTH);
+        rightPanel.add(paletteContainer, BorderLayout.CENTER);
 
         mainSplitPane.setLeftComponent(leftPanel);
         mainSplitPane.setRightComponent(rightPanel);
@@ -1023,22 +1050,24 @@ public class MapEditor extends JFrame {
             JButton tileButton = new JButton(tile.getName());
             tileButton.setVerticalTextPosition(SwingConstants.BOTTOM);
             tileButton.setHorizontalTextPosition(SwingConstants.CENTER);
-            tileButton.setPreferredSize(new Dimension(80, 90));
-            tileButton.setFont(new Font("Arial", Font.PLAIN, 11));
+            tileButton.setPreferredSize(new Dimension(75, 85));
+            tileButton.setMaximumSize(new Dimension(75, 85));
+            tileButton.setMinimumSize(new Dimension(75, 85));
+            tileButton.setFont(new Font("Arial", Font.PLAIN, 10));
             tileButton.setToolTipText("ID: " + tileId + " - " + tile.getName() +
                     " | 碰撞: " + (tile.hasCollision() ? "有" : "无"));
 
             // 设置图像预览（优先使用真实图像，若无使用颜色块）
             if (tile.getImage() != null) {
-                Image img = tile.getImage().getScaledInstance(56, 56, Image.SCALE_SMOOTH);
+                Image img = tile.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
                 tileButton.setIcon(new ImageIcon(img));
             } else {
-                BufferedImage bi = new BufferedImage(56, 56, BufferedImage.TYPE_INT_ARGB);
+                BufferedImage bi = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2 = bi.createGraphics();
                 g2.setColor(tile.getDisplayColor());
-                g2.fillRect(0, 0, 56, 56);
+                g2.fillRect(0, 0, 50, 50);
                 g2.setColor(Color.BLACK);
-                g2.drawRect(0, 0, 55, 55);
+                g2.drawRect(0, 0, 49, 49);
                 g2.dispose();
                 tileButton.setIcon(new ImageIcon(bi));
             }
@@ -1080,21 +1109,23 @@ public class MapEditor extends JFrame {
             JButton tileButton = new JButton(tile.getName());
             tileButton.setVerticalTextPosition(SwingConstants.BOTTOM);
             tileButton.setHorizontalTextPosition(SwingConstants.CENTER);
-            tileButton.setPreferredSize(new Dimension(80, 90));
-            tileButton.setFont(new Font("Arial", Font.PLAIN, 11));
+            tileButton.setPreferredSize(new Dimension(75, 85));
+            tileButton.setMaximumSize(new Dimension(75, 85));
+            tileButton.setMinimumSize(new Dimension(75, 85));
+            tileButton.setFont(new Font("Arial", Font.PLAIN, 10));
             tileButton.setToolTipText("ID: " + tileId + " - " + tile.getName() +
                     " | 碰撞: " + (tile.hasCollision() ? "有" : "无"));
 
             if (tile.getImage() != null) {
-                Image img = tile.getImage().getScaledInstance(56, 56, Image.SCALE_SMOOTH);
+                Image img = tile.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
                 tileButton.setIcon(new ImageIcon(img));
             } else {
-                BufferedImage bi = new BufferedImage(56, 56, BufferedImage.TYPE_INT_ARGB);
+                BufferedImage bi = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2 = bi.createGraphics();
                 g2.setColor(tile.getDisplayColor());
-                g2.fillRect(0, 0, 56, 56);
+                g2.fillRect(0, 0, 50, 50);
                 g2.setColor(Color.BLACK);
-                g2.drawRect(0, 0, 55, 55);
+                g2.drawRect(0, 0, 49, 49);
                 g2.dispose();
                 tileButton.setIcon(new ImageIcon(bi));
             }
