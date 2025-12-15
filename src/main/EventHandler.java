@@ -67,10 +67,10 @@ public class EventHandler {
                 damagePit(gp.dialogueState);
             } else if (hit(0, 23, 12, "up") == true) {
                 healingPool(gp.dialogueState);
-            } else if (hit(0, 10, 39, "any") == true) {
+            } else if (hit(0, 13, 38, "any") == true) {
                 teleport(1, 12, 13, gp.indoor); // 商人小屋
             } else if (hit(1, 12, 13, "any") == true) {
-                teleport(0, 10, 39, gp.outside);
+                teleport(0, 13, 38, gp.outside); // 如果改了商人小屋的坐标，这一行也要改。不然传送回来会卡墙
             } else if (hit(0, 12, 9, "any") == true) {
                 // teleport(3, 26, 41, gp.dungeon); // 主世界 传送到 dungeon02
                 teleport(2, 9, 41, gp.dungeon); // 主世界 传送到 dungeon01

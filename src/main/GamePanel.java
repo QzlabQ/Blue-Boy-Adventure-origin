@@ -14,6 +14,7 @@ import java.util.Comparator;
 import javax.swing.JPanel;
 
 import ai.PathFinder;
+import data.Progress;
 import data.SaveLoad;
 import entity.Entity;
 import entity.Player;
@@ -146,6 +147,7 @@ public class GamePanel extends JPanel implements Runnable {
             aSetter.setObject();
             aSetter.setInteractiveTile();
             eManager.lighting.resetDay();
+            Progress.skeletonLordDefeated = false;
         }
     }
 

@@ -2,6 +2,7 @@ package monster;
 
 import entity.Entity;
 import main.GamePanel;
+import object.OBJ_Blueheart;
 import object.OBJ_Coin_Bronze;
 import object.OBJ_Door_Iron;
 import object.OBJ_Heart;
@@ -155,6 +156,17 @@ public class MON_SkeletonLord extends Entity {
                 gp.obj[gp.currentMap][i] = null;
             }
         }
+
+        // 这里有石山代码， 我绕过了地图编辑器，直接把钻石作为掉落物放到指定坐标。。
+        for (int i = 0; i < gp.obj[1].length; i++) {
+            if (gp.obj[gp.currentMap][i] == null) {
+                gp.obj[gp.currentMap][i] = new OBJ_Blueheart(gp);
+                gp.obj[gp.currentMap][i].worldX = gp.tileSize * 25; // the dead monster's position
+                gp.obj[gp.currentMap][i].worldY = gp.tileSize * 8;
+                break;
+            }
+        }
+
         // Cast a die
         int i = new Random().nextInt(100) + 1;
 

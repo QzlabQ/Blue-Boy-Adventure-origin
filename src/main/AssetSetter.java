@@ -8,6 +8,8 @@ import tile_interactive.*;
 import java.io.*;
 import java.util.*;
 
+import data.Progress;
+
 public class AssetSetter {
 
     GamePanel gp;
@@ -191,6 +193,10 @@ public class AssetSetter {
 
                 Entity monster = createMonster(data.typeName);
                 if (monster != null) {
+                    if(monster.name.equals(MON_SkeletonLord.monName) && Progress.skeletonLordDefeated == true){
+                        index++;
+                        continue;
+                    }
                     monster.worldX = data.x * gp.tileSize;
                     monster.worldY = data.y * gp.tileSize;
 

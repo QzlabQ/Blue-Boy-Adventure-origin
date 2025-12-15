@@ -195,7 +195,7 @@ public class UI {
                     }
                 }
                 // 情况 2: Boss (Boss 血条通常不需要 inCamera 判断，只要Boss活着就显示在屏幕固定位置)
-                else if (monster.boss) {
+                else if (monster.boss && monster.sleep == false) {
                     
                     double oneScale = (double) gp.tileSize * 8 / monster.maxLife;
                     double hyBarValue = oneScale * monster.life;
