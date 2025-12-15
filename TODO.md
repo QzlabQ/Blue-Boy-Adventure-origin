@@ -11,6 +11,9 @@
 9. 格挡（parry & defence 区别）（fauchi）
 10. 石头推行（fauchi）
 11. fire ball lighting & damage(胡)
+
+> 火球伤害已加强，伤害随等级升高（`entity/projectile.java` 第30行，伤害自定义为`attack * (gp.player.level * 2)`）
+
 12. delete career class（huang）
 13. 最小化后，key一直输入（有机会？）
 14. 增加assets editor (已经完成，集成在MapEditor中；地图文件的格式也同步更新了)

@@ -79,6 +79,7 @@ public class UI {
         // PLAY STATE
         if (gp.gameState == gp.playState) {
             drawPlayerLife();
+            drawMonsterLife();
             drawMessage();
         }
         // PAUSE STATE
@@ -165,6 +166,54 @@ public class UI {
             g2.drawImage(crystal_full, x, y, null);
             i++;
             x += 35;
+        }
+    }
+
+    public void drawMonsterLife() {
+        for (int i = 0; i < gp.monster[1].length; i++) {
+            Entity monster = gp.monster[gp.currentMap][i];
+
+            if (monster != null) {
+
+                // 情况 1: 普通怪物 (在镜头内 + 血条激活 + 不是Boss)
+                if (monster.inCamera() && monster.hpBarOn && !monster.boss) {
+
+                    double oneScale = (double) gp.tileSize / monster.maxLife;
+                    double hyBarValue = oneScale * monster.life;
+
+                    g2.setColor(new Color(35, 35, 35));
+                    g2.fillRect(monster.getScreenX() - 1, monster.getScreenY() - 16, gp.tileSize + 2, 12);
+
+                    g2.setColor(new Color(255, 0, 30));
+                    g2.fillRect(monster.getScreenX(), monster.getScreenY() - 15, (int) hyBarValue, 10);
+
+                    monster.hpBarCounter++;
+
+                    if (monster.hpBarCounter > 600) {
+                        monster.hpBarCounter = 0;
+                        monster.hpBarOn = false;
+                    }
+                }
+                // 情况 2: Boss (Boss 血条通常不需要 inCamera 判断，只要Boss活着就显示在屏幕固定位置)
+                else if (monster.boss) {
+                    
+                    double oneScale = (double) gp.tileSize * 8 / monster.maxLife;
+                    double hyBarValue = oneScale * monster.life;
+
+                    int x = gp.screenWidth / 2 - gp.tileSize * 4;
+                    int y = gp.tileSize * 10;
+
+                    g2.setColor(new Color(35, 35, 35));
+                    g2.fillRect(x - 1, y - 1, gp.tileSize * 8 + 2, 22);
+
+                    g2.setColor(new Color(255, 0, 30));
+                    g2.fillRect(x, y, (int) hyBarValue, 20);
+
+                    g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24f));
+                    g2.setColor(Color.white);
+                    g2.drawString(monster.name, x + 4, y - 10);
+                }
+            }
         }
     }
 
