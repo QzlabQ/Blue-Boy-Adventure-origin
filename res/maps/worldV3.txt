@@ -97,3 +97,6 @@ IT,IT_DryTree,29,31
 IT,IT_DryTree,30,31
 IT,IT_DryTree,13,39
 IT,IT_DryTree,13,40
+MON,MON_RedSlime,37,9
+MON,MON_RedSlime,36,11
+MON,MON_RedSlime,40,10

@@ -1,22 +1,22 @@
 # 可选项 & 现在有的bug
 
-1. `eventHandler.java` 的 58 行，可以考虑给 pit 加个贴图(直接注释)//delete or creat image?
-2. 主世界的史莱姆可以弄点红的，右上角的空地。可以用地图编辑器查坐标（fauchi）
-3. **游戏失败后、传送到地牢 音乐会重叠，找到对应的地方把音乐停了** (QzlabQ)
-4. 商人小屋门口的树太多了，可以只留几颗，加快游戏进度
-5. 适当修改怪物参数，达到游戏平衡(fauchi)
-6. 这个fq修好了 *Loadgame之后打开地牢的箱子游戏会炸*(fixed)
-7. 游戏开太久了会炸（之后测试）
-8. 改ai的寻路范围（胡）
-9. 格挡（parry & defence 区别）（fauchi）
-10. 石头推行（fauchi）
-11. fire ball lighting & damage(胡)
+- [ ]  `eventHandler.java` 的 58 行，可以考虑给 pit 加个贴图
+- [x]  主世界的史莱姆可以弄点红的，右上角的空地。可以用地图编辑器查坐标（fauchi）
+- [ ]  游戏失败后、传送到地牢 音乐会重叠，找到对应的地方把音乐停了 (QzlabQ)
+- [ ]  适当修改怪物参数，达到游戏平衡(fauchi)
+- [x]  Loadgame之后打开地牢的箱子游戏会炸
+- [ ]  游戏开太久了会炸（之后测试）
+- [ ]  改ai的寻路范围（胡）
+- [ ]  格挡（parry & defence 区别）（fauchi）
+- [x]  石头推行
+- [ ]  fire ball lighting (胡)
+- [x]  fire ball damage
 
 > 火球伤害已加强，伤害随等级升高（`entity/projectile.java` 第30行，伤害自定义为`attack * (gp.player.level * 2)`）
 
-12. delete career class（huang）
-13. 最小化后，key一直输入（有机会？）
-14. 增加assets editor (已经完成，集成在MapEditor中；地图文件的格式也同步更新了)
+- [x]  delete career class（huang）
+- [ ]  最小化后，key一直输入（有机会？）
+- [x]  增加assets editor (已经完成，集成在MapEditor中；地图文件的格式也同步更新了)
 
 ## 提示
 

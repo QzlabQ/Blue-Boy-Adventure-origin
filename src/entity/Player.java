@@ -276,6 +276,18 @@ public class Player extends Entity {
             // CHECK NPC COLLISION
             int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
             interactNPC(npcIndex);
+            
+            // --- 【新增】推石头逻辑 ---
+            if (npcIndex != 999) {
+                // 如果碰撞到了东西，并且那个东西是石头
+                if (gp.npc[gp.currentMap][npcIndex] instanceof NPC_BigRock) {
+                    
+                    // 核心逻辑：直接把玩家当前的方向传给石头，让石头移动
+                    // 这里的 this.direction 就是玩家现在的朝向
+                    gp.npc[gp.currentMap][npcIndex].move(this.direction);
+                }
+            }
+            // ------------------------
 
             // CHECK MONSTER COLLISION
             int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
@@ -422,7 +434,7 @@ public class Player extends Entity {
             if (i != 999) {
                 attackCanceled = true;
                 if (gp.npc[gp.currentMap][i] instanceof NPC_BigRock) {
-                    gp.npc[gp.currentMap][i].move(direction);
+                    // gp.npc[gp.currentMap][i].move(direction);
                 } else {
                     gp.gameState = gp.dialogueState;
                     gp.npc[gp.currentMap][i].speak();
