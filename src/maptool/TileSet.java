@@ -18,7 +18,7 @@ public class TileSet {
         setup(0, "voidimg", false);
         setup(1, "stairs1", false);
         setup(2, "stairs2", false);
-        setup(3, "grass00", false);
+        setup(3, "spike", false);
         setup(4, "grass00", false);
         setup(6, "grass00", false);
         setup(7, "grass00", false);

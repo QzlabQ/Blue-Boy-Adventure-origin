@@ -115,10 +115,12 @@ public class Entity {
     public Entity(GamePanel gp) {
         this.gp = gp;
     }
+
     public int getScreenX() {
         int screenX = worldX - gp.player.worldX + gp.player.screenX;
         return screenX;
     }
+
     public int getScreenY() {
         int screenY = worldY - gp.player.worldY + gp.player.screenY;
         return screenY;
@@ -148,16 +150,18 @@ public class Entity {
         return (worldY + solidArea.y) / gp.tileSize;
     }
 
-    public int getCenterX(){
+    public int getCenterX() {
         int centerX = worldX + up1.getWidth() / 2;
         return centerX;
     }
-    public int getCenterY(){
+
+    public int getCenterY() {
         int centerY = worldY + up1.getWidth() / 2;
         return centerY;
     }
+
     public int getXDistance(Entity target) {
-        int xDistance = Math.abs(getCenterX()- target.getCenterX());
+        int xDistance = Math.abs(getCenterX() - target.getCenterX());
         return xDistance;
     }
 
@@ -180,7 +184,8 @@ public class Entity {
         int goalRow = (target.worldY + target.solidArea.y) / gp.tileSize;
         return goalRow;
     }
-    public void resetCounter(){
+
+    public void resetCounter() {
         spriteCounter = 0;
         actionLockCounter = 0;
         invincibleCounter = 0;
@@ -191,13 +196,14 @@ public class Entity {
         guardCounter = 0;
         offBalanceCounter = 0;
     }
-    public void SetLoot(Entity loot){
+
+    public void SetLoot(Entity loot) {
     }
 
     public void setAction() {
     }
 
-    public void move(String direction){
+    public void move(String direction) {
     }
 
     public void damageReaction() {
@@ -444,20 +450,22 @@ public class Entity {
     public void checkStopChasingOrNot(Entity target, int distance, int rate) {
 
         if (getTileDistance(target) > distance) {
-            int i = new Random().nextInt(rate);
-            if (i == 0) {
-                onPath = false;
-            }
+            // int i = new Random().nextInt(rate);
+            // if (i == 0) {
+            onPath = false;
+            // }
+            // 现在只要距离够远就停止追踪，不判断概率
         }
     }
 
     public void checkStartChasingOrNot(Entity target, int distance, int rate) {
 
         if (getTileDistance(target) < distance) {
-            int i = new Random().nextInt(rate);
-            if (i == 0) {
-                onPath = true;
-            }
+            // int i = new Random().nextInt(rate);
+            // if (i == 0) {
+            onPath = true;
+            // }
+            // 现在只要距离够近就开始追踪，不判断概率
         }
     }
 
@@ -484,20 +492,20 @@ public class Entity {
         }
     }
 
-    public void moveTowordPlayer(int interval){
+    public void moveTowordPlayer(int interval) {
         actionLockCounter++;
 
         if (actionLockCounter > interval) {
-            if(getXDistance(gp.player) > getYDistance(gp.player)){
-                if(gp.player.getCenterX() < getCenterX()){
+            if (getXDistance(gp.player) > getYDistance(gp.player)) {
+                if (gp.player.getCenterX() < getCenterX()) {
                     direction = "left";
-                }else {
+                } else {
                     direction = "right";
                 }
-            } else if(getXDistance(gp.player) < getYDistance(gp.player)){
-                if(gp.player.getCenterY() < getCenterY()){
+            } else if (getXDistance(gp.player) < getYDistance(gp.player)) {
+                if (gp.player.getCenterY() < getCenterY()) {
                     direction = "up";
-                }else {
+                } else {
                     direction = "down";
                 }
             }
@@ -638,16 +646,17 @@ public class Entity {
         target.knockBack = true;
     }
 
-    public boolean inCamera(){
+    public boolean inCamera() {
         boolean inCamera = false;
         if (worldX + gp.tileSize * 5 > gp.player.worldX - gp.player.screenX &&
-            worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
-            worldY + gp.tileSize * 5 > gp.player.worldY - gp.player.screenY &&
-            worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
-                inCamera = true;
+                worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
+                worldY + gp.tileSize * 5 > gp.player.worldY - gp.player.screenY &&
+                worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
+            inCamera = true;
         }
         return inCamera;
     }
+
     public void draw(Graphics2D g2) {
 
         BufferedImage image = null;
@@ -732,8 +741,6 @@ public class Entity {
                     }
                     break;
             }
-
-
 
             if (invincible == true) {
                 hpBarOn = true;

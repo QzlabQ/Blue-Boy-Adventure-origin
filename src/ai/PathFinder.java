@@ -12,6 +12,7 @@ public class PathFinder {
     Node startNode, goalNode, currentNode;
     boolean goalReached = false;
     int step = 0;
+    public int maxSearchRange = 10;
 
     public PathFinder(GamePanel gp) {
         this.gp = gp;
@@ -171,10 +172,35 @@ public class PathFinder {
     }
 
     public void openNode(Node node) {
+        // 检查条件：未开放，未检查，非障碍物
         if (node.open == false && node.checked == false && node.solid == false) {
-            node.open = true;
-            node.parent = currentNode;
-            openList.add(node);
+
+            // 【新增检查】: 检查该节点是否超出了最大搜索范围
+            // 我们需要先计算这个节点的 G Cost
+            // 由于在 setNodes 中只计算了初始节点的 G/H/F，扩展邻居时需要重新计算
+            // 步骤 1: 临时计算 G Cost (因为它依赖于 parent 节点)
+
+            // 计算从起点经过当前父节点 (currentNode) 到该节点的新 G Cost
+            int tempGCost = currentNode.gCost + 1; // 假设相邻移动成本为 1
+
+            // 【核心判断】: 如果 G Cost 超过了最大范围，则不加入 Open List
+            if (tempGCost > maxSearchRange) {
+                return; // 超出范围，不予探索
+            }
+
+            // 步骤 2: 更新节点的成本和父节点 (这部分必须在检查通过后执行)
+            if (node.open == false || tempGCost < node.gCost) {
+                // 只有当该节点是新的，或者找到了更短的路径时，才更新
+                node.gCost = tempGCost;
+                node.hCost = Math.abs(node.col - goalNode.col) + Math.abs(node.row - goalNode.row);
+                node.fCost = node.gCost + node.hCost;
+                node.parent = currentNode;
+
+                if (node.open == false) {
+                    node.open = true;
+                    openList.add(node);
+                }
+            }
         }
     }
 

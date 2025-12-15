@@ -54,14 +54,14 @@ public class MON_GreenSlime extends Entity {
     public void setAction() {
         if (onPath == true) {
             // 离得太远了不追了
-            checkStopChasingOrNot(gp.player, 15, 100);
+            checkStopChasingOrNot(gp.player, 6, 100);
             // 找到前进方向
             searchPath(getGoalCol(gp.player), getGoalRow(gp.player));
             // 射
             checkShootOrNot(200, 30);
         } else {
             // 靠得太近了开始追
-            checkStartChasingOrNot(gp.player, 20, 100);
+            checkStartChasingOrNot(gp.player, 4, 100);
             getRandomDirection(120);
         }
     }
