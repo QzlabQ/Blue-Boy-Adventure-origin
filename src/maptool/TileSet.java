@@ -60,6 +60,7 @@ public class TileSet {
         setup(42, "hut", false);
         setup(43, "floor01", false);
         setup(44, "table01", true);
+        // setup(45, "spike", false);
     }
 
     private void setup(int id, String name, boolean hasCollision) {

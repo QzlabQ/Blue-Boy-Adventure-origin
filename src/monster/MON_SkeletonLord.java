@@ -3,10 +3,13 @@ package monster;
 import entity.Entity;
 import main.GamePanel;
 import object.OBJ_Coin_Bronze;
+import object.OBJ_Door_Iron;
 import object.OBJ_Heart;
 import object.OBJ_ManaCrystal;
 
 import java.util.Random;
+
+import data.Progress;
 
 public class MON_SkeletonLord extends Entity {
 
@@ -23,12 +26,13 @@ public class MON_SkeletonLord extends Entity {
         name = monName;
         defaultSpeed = 1;
         speed = defaultSpeed;
-        maxLife = 50;
+        maxLife = 150;
         life = maxLife;
         attack = 10;
         defense = 2;
-        exp = 50;
-        knockBackPower = 5;
+        exp = 150;
+        knockBackPower = 7;
+        sleep = true;
 
         int size = gp.tileSize * 5;
 
@@ -52,6 +56,7 @@ public class MON_SkeletonLord extends Entity {
         motion2_duration = 50;
         getImage();
         getAttackImage();
+        setDialogue();
     }
 
     public void getImage() {
@@ -102,7 +107,17 @@ public class MON_SkeletonLord extends Entity {
 
     }
 
+    public void setDialogue(){
+        dialogues[0] = "No one can steal my treasure!";
+        dialogues[1] = "You will DIE here!";
+        dialogues[2] = "WELCOME TO YOUR DOOM!";
+    }
+
     public void setAction() {
+
+        if (sleep == true) {
+            return; 
+        }
         // 二阶段：血量折半时，移速加快，攻击加倍
         if(inRage == false && life < maxLife / 2){
             inRage = true;
@@ -129,6 +144,17 @@ public class MON_SkeletonLord extends Entity {
 
     public void checkDrop() {
 
+        gp.bossBattleOn = false;
+        gp.stopMusic();
+        gp.playMusic(19);
+        Progress.skeletonLordDefeated = true;
+
+        for(int i = 0; i < gp.obj[1].length; i++){
+            if(gp.obj[gp.currentMap][i] != null && gp.obj[gp.currentMap][i].name.equals(OBJ_Door_Iron.objName)){
+                gp.playSE(21);
+                gp.obj[gp.currentMap][i] = null;
+            }
+        }
         // Cast a die
         int i = new Random().nextInt(100) + 1;
 

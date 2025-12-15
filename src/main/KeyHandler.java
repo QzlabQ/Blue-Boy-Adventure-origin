@@ -43,6 +43,10 @@ public class KeyHandler implements KeyListener {
         else if (gp.gameState == gp.dialogueState) {
             dialogueState(code);
         }
+        // CUTSCENE STATE
+        else if (gp.gameState == gp.cutsceneState) {
+            cutsceneState(code);
+        }
         // CHARACTER STATE
         else if (gp.gameState == gp.characterState) {
             characterState(code);
@@ -165,6 +169,11 @@ public class KeyHandler implements KeyListener {
             } else if (godModeOn == true) {
                 godModeOn = false;
             }
+        }
+    }
+    public void cutsceneState(int code) {
+        if (code == KeyEvent.VK_ENTER) {
+            enterPressed = true; // 只记录按键，不切状态！
         }
     }
 

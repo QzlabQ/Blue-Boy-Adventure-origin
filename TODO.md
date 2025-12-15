@@ -1,13 +1,12 @@
 # 可选项 & 现在有的bug
 
-- [ ]  `eventHandler.java` 的 58 行，可以考虑给 pit 加个贴图
-- [x]  主世界的史莱姆可以弄点红的，右上角的空地。可以用地图编辑器查坐标（fauchi）
-- [ ]  游戏失败后、传送到地牢 音乐会重叠，找到对应的地方把音乐停了 (QzlabQ)
-- [ ]  适当修改怪物参数，达到游戏平衡(fauchi)
+- [x]  `eventHandler.java` 的 58 行，可以考虑给 pit 加个贴图
+- [x]  主世界的史莱姆可以弄点红的，右上角的空地。可以用地图编辑器查坐标（fauci）
+- [x]  游戏失败后、传送到地牢 音乐会重叠，找到对应的地方把音乐停了 (QzlabQ)
+- [ ]  适当修改怪物参数，达到游戏平衡(fauci)
 - [x]  Loadgame之后打开地牢的箱子游戏会炸
-- [ ]  游戏开太久了会炸（之后测试）
-- [x]  改ai的寻路范围（胡）
-- [ ]  格挡（parry & defence 区别）（fauchi）
+
+ [ ]  格挡（parry & defence 区别）（fauci）
 - [x]  石头推行
 - [ ]  fire ball lighting (胡)
 - [x]  fire ball damage
@@ -21,6 +20,7 @@
 - [x]  增加assets editor (已经完成，集成在MapEditor中；地图文件的格式也同步更新了)
 - [ ]  制作展示视频（游戏引擎，mapeditor，...）
 - [ ]  检查新tile的添加方法
+- [x]  boss battle
 
 ## 提示
 
@@ -37,3 +37,4 @@ if (gp.iTile[gp.currentMap][i].life == 0) {
 3. 按 G 开无敌
 4. `environment/Light.java` 可以把屏幕上的时间注释掉
 5. `main/eventHandler` 68 69 70 行跳关，理论上应该是，`主世界->地牢一层->地牢二层`， 为方便体验游戏内容可以改成 `主世界->地牢二层`
+

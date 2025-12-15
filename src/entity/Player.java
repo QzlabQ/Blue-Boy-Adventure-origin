@@ -208,7 +208,9 @@ public class Player extends Entity {
     }
 
     public void update() {
-
+        if (gp.gameState == gp.cutsceneState) {
+            return;
+        }
         if (knockBack == true) {
 
             collisionOn = false;
@@ -449,7 +451,9 @@ public class Player extends Entity {
     }
 
     public void contactMonster(int i) {
-
+        if (gp.gameState == gp.cutsceneState) {
+            return;
+        }
         if (i != 999) {
 
             if (invincible == false && gp.monster[gp.currentMap][i].dying == false) {
@@ -722,7 +726,9 @@ public class Player extends Entity {
         if (transparent == true) {
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
         }
-        g2.drawImage(image, tempScreenX, tempScreenY, null);
+        if(drawing == true){
+            g2.drawImage(image, tempScreenX, tempScreenY, null);
+        }
 
         // Reset alpha
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));

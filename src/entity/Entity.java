@@ -21,16 +21,17 @@ public class Entity {
     public Rectangle solidArea = new Rectangle(0, 0, 48, 48);// DEFAULT, YOU CAN REWRITE IT IN EACH SPECIFIC CLASS
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
-    String dialogues[] = new String[20];
+    public String dialogues[] = new String[20];
     public Entity attacker;
     public BufferedImage image, image2, image3;
     public Entity linkedEntity;
+    public boolean temp = false; // BOSS 战的标记，防止卡死了
 
     // STATE
     public int worldX, worldY;
     public String direction = "down";
     public int spriteNum = 1;
-    int dialogueIndex = 0;
+    public int dialogueIndex = 0;
     public boolean collision = false;
     public boolean invincible = false;
     public boolean attacking = false;
@@ -46,6 +47,8 @@ public class Entity {
     public Entity loot;
     public boolean opened = false;
     public boolean inRage = false;
+    public boolean sleep = false;
+    public boolean drawing = true;
     // COUNTER
     public int spriteCounter = 0;
     public int actionLockCounter = 0;
@@ -307,89 +310,90 @@ public class Entity {
     }
 
     public void update() {
-
-        if (knockBack == true) {
-            checkCollision();
-
-            if (collisionOn == true) {
-                knockBackCounter = 0;
-                knockBack = false;
-                speed = defaultSpeed;
-            } else if (collisionOn == false) {
-                switch (knockBackDirection) {
-                    case "up":
-                        worldY -= speed;
-                        break;
-                    case "down":
-                        worldY += speed;
-                        break;
-                    case "left":
-                        worldX -= speed;
-                        break;
-                    case "right":
-                        worldX += speed;
-                        break;
+        if(sleep == false){
+            if (knockBack == true) {
+                checkCollision();
+    
+                if (collisionOn == true) {
+                    knockBackCounter = 0;
+                    knockBack = false;
+                    speed = defaultSpeed;
+                } else if (collisionOn == false) {
+                    switch (knockBackDirection) {
+                        case "up":
+                            worldY -= speed;
+                            break;
+                        case "down":
+                            worldY += speed;
+                            break;
+                        case "left":
+                            worldX -= speed;
+                            break;
+                        case "right":
+                            worldX += speed;
+                            break;
+                    }
+                }
+    
+                knockBackCounter++;
+                if (knockBackCounter == 10) {
+                    knockBackCounter = 0;
+                    knockBack = false;
+                    speed = defaultSpeed;
+                }
+            } else if (attacking == true) {
+                attacking();
+            } else if (offBalance == true) {
+                offBalanceCounter++;
+                if (offBalanceCounter > 60) {
+                    offBalance = false;
+                    offBalanceCounter = 0;
+                }
+            } else {
+                setAction();
+                checkCollision();
+    
+                // IF COLLISION IS FALSE, PLAYER CAN MOVE
+                if (collisionOn == false) {
+    
+                    switch (direction) {
+    
+                        case "up":
+                            worldY -= speed;
+                            break;
+                        case "down":
+                            worldY += speed;
+                            break;
+                        case "left":
+                            worldX -= speed;
+                            break;
+                        case "right":
+                            worldX += speed;
+                            break;
+                    }
+                }
+    
+                spriteCounter++;
+                if (spriteCounter > 24) {
+                    if (spriteNum == 2) {// spriteNum is the Number of images, sprite Counter is the time which animation
+                                         // will cost
+                        spriteNum = 0;
+                    }
+                    spriteNum++;
+                    spriteCounter = 0;
                 }
             }
-
-            knockBackCounter++;
-            if (knockBackCounter == 10) {
-                knockBackCounter = 0;
-                knockBack = false;
-                speed = defaultSpeed;
-            }
-        } else if (attacking == true) {
-            attacking();
-        } else if (offBalance == true) {
-            offBalanceCounter++;
-            if (offBalanceCounter > 60) {
-                offBalance = false;
-                offBalanceCounter = 0;
-            }
-        } else {
-            setAction();
-            checkCollision();
-
-            // IF COLLISION IS FALSE, PLAYER CAN MOVE
-            if (collisionOn == false) {
-
-                switch (direction) {
-
-                    case "up":
-                        worldY -= speed;
-                        break;
-                    case "down":
-                        worldY += speed;
-                        break;
-                    case "left":
-                        worldX -= speed;
-                        break;
-                    case "right":
-                        worldX += speed;
-                        break;
+    
+            if (invincible == true) {
+                invincibleCounter++;
+                if (invincibleCounter > 40) {
+                    invincible = false;
+                    invincibleCounter = 0;
                 }
             }
-
-            spriteCounter++;
-            if (spriteCounter > 24) {
-                if (spriteNum == 2) {// spriteNum is the Number of images, sprite Counter is the time which animation
-                                     // will cost
-                    spriteNum = 0;
-                }
-                spriteNum++;
-                spriteCounter = 0;
+            if (shotAvailableCounter < 30) {
+                shotAvailableCounter++;
             }
-        }
-
-        if (invincible == true) {
-            invincibleCounter++;
-            if (invincibleCounter > 40) {
-                invincible = false;
-                invincibleCounter = 0;
-            }
-        }
-        if (shotAvailableCounter < 30) {
-            shotAvailableCounter++;
         }
     }
 
