@@ -106,6 +106,7 @@ public class Player extends Entity {
         inventory.add(currentShield);
         inventory.add(new OBJ_Key(gp));
         inventory.add(new OBJ_Key(gp));
+        inventory.add(new OBJ_Fireball(gp));
         inventory.add(new OBJ_Lantern(gp));
 
     }
@@ -276,12 +277,12 @@ public class Player extends Entity {
             // CHECK NPC COLLISION
             int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
             interactNPC(npcIndex);
-            
+
             // --- 【新增】推石头逻辑 ---
             if (npcIndex != 999) {
                 // 如果碰撞到了东西，并且那个东西是石头
                 if (gp.npc[gp.currentMap][npcIndex] instanceof NPC_BigRock) {
-                    
+
                     // 核心逻辑：直接把玩家当前的方向传给石头，让石头移动
                     // 这里的 this.direction 就是玩家现在的朝向
                     gp.npc[gp.currentMap][npcIndex].move(this.direction);

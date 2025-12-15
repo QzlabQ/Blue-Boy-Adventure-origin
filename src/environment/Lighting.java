@@ -125,17 +125,18 @@ public class Lighting {
         }
     }
 
-    public void resetDay(){
+    public void resetDay() {
         dayState = day;
         filterAlpha = 0f;
-        
+
     }
+
     public void draw(Graphics2D g2) {
 
-        if(gp.currentArea == gp.outside){
+        if (gp.currentArea == gp.outside) {
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, filterAlpha));
         }
-        if(gp.currentArea == gp.outside || gp.currentArea == gp.dungeon){
+        if (gp.currentArea == gp.outside || gp.currentArea == gp.dungeon) {
             g2.drawImage(darknessFilter, 0, 0, null);
         }
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
@@ -144,10 +145,18 @@ public class Lighting {
         String situation = "";
 
         switch (dayState) {
-            case day: situation = "Day"; break;
-            case dusk: situation = "Dusk"; break;
-            case night: situation = "Night"; break;
-            case dawn: situation = "Dawn"; break;
+            case day:
+                situation = "Day";
+                break;
+            case dusk:
+                situation = "Dusk";
+                break;
+            case night:
+                situation = "Night";
+                break;
+            case dawn:
+                situation = "Dawn";
+                break;
         }
         g2.setColor(Color.white);
         g2.setFont(g2.getFont().deriveFont(50f));

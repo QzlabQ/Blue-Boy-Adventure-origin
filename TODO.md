@@ -6,17 +6,21 @@
 - [ ]  适当修改怪物参数，达到游戏平衡(fauchi)
 - [x]  Loadgame之后打开地牢的箱子游戏会炸
 - [ ]  游戏开太久了会炸（之后测试）
-- [ ]  改ai的寻路范围（胡）
+- [x]  改ai的寻路范围（胡）
 - [ ]  格挡（parry & defence 区别）（fauchi）
 - [x]  石头推行
 - [ ]  fire ball lighting (胡)
 - [x]  fire ball damage
+- [ ]  boss攻击范围的提示
+- [ ]  空气墙阻挡npc进入关键区域
 
 > 火球伤害已加强，伤害随等级升高（`entity/projectile.java` 第30行，伤害自定义为`attack * (gp.player.level * 2)`）
 
 - [x]  delete career class（huang）
 - [ ]  最小化后，key一直输入（有机会？）
 - [x]  增加assets editor (已经完成，集成在MapEditor中；地图文件的格式也同步更新了)
+- [ ]  制作展示视频（游戏引擎，mapeditor，...）
+- [ ]  检查新tile的添加方法
 
 ## 提示
 

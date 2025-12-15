@@ -10,6 +10,7 @@ public class OBJ_Fireball extends Projectile {
     public static final String objName = "Fireball";
 
     GamePanel gp;
+
     public OBJ_Fireball(GamePanel gp) {
         super(gp);
         this.gp = gp;
