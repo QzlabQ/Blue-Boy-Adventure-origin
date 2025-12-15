@@ -801,6 +801,7 @@ public class UI {
         if (commandNum == 0) {
             g2.drawString(">", textX - 25, textY);
             if (gp.keyH.enterPressed) {
+                gp.stopMusic();
                 subState = 0;
                 gp.gameState = gp.titleState;
                 gp.resetGame(true);
