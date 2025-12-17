@@ -46,16 +46,9 @@ public class AssetSetter {
 
     // 加载所有地图的实体数据
     private void loadAllMapEntities() {
-        // 根据TileManager中的地图加载顺序来加载实体
-        String[] mapFiles = {
-                "/maps/worldV3.txt",
-                "/maps/interior01.txt",
-                "/maps/mydungeon01.txt",
-                "/maps/mydungeon02.txt"
-        };
-
-        for (int i = 0; i < Math.min(gp.maxMap, mapFiles.length); i++) {
-            loadMapEntities(mapFiles[i], i);
+        // 根据MapData中的地图加载顺序来加载实体
+        for (int i = 0; i < Math.min(gp.maxMap, MapData.getMapCount()); i++) {
+            loadMapEntities(MapData.getMap(i), i);
         }
     }
 

@@ -57,13 +57,13 @@ public class EventHandler {
         if (canTouchEvent == true) {
             if (hit(2, 27, 11, "any") == true) {
                 damagePit(gp.dialogueState); // 这个pit没有贴图，可以考虑加上贴图，或者直接注释掉
-            } else if (hit(2,14,28, "any") == true) {
+            } else if (hit(2, 14, 28, "any") == true) {
                 damagePit(gp.dialogueState);
-            } else if (hit(2,15,28, "any") == true) {
+            } else if (hit(2, 15, 28, "any") == true) {
                 damagePit(gp.dialogueState);
-            } else if (hit(2,15,40, "any") == true) {
+            } else if (hit(2, 15, 40, "any") == true) {
                 damagePit(gp.dialogueState);
-            } else if (hit(2,16,40, "any") == true) {
+            } else if (hit(2, 16, 40, "any") == true) {
                 damagePit(gp.dialogueState);
             } else if (hit(0, 23, 12, "up") == true) {
                 healingPool(gp.dialogueState);
@@ -80,7 +80,7 @@ public class EventHandler {
                 teleport(3, 26, 41, gp.dungeon); // 01 传送到dungeon02
             } else if (hit(3, 26, 41, "any") == true) {
                 teleport(2, 8, 7, gp.dungeon); // 02 传送到dungeon01
-            }else if (hit(3,25,27,"any") == true) {
+            } else if (hit(3, 25, 27, "any") == true) {
                 skeletonLord();
             }
             if (hit(1, 12, 9, "up") == true) {
@@ -163,10 +163,10 @@ public class EventHandler {
         }
     }
 
-    public void skeletonLord(){
-        if(gp.bossBattleOn == false && Progress.skeletonLordDefeated == false){
+    public void skeletonLord() {
+        if (gp.bossBattleOn == false && Progress.skeletonLordDefeated == false) {
             gp.gameState = gp.cutsceneState;
-            gp.csManager.sceneNum = gp.csManager.skeletonLord;  
+            gp.csManager.sceneNum = gp.csManager.skeletonLord;
         }
     }
 }

@@ -1,6 +1,9 @@
 package maptool;
 
 import javax.swing.*;
+
+import main.MapData;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -724,7 +727,7 @@ public class MapEditor extends JFrame {
         rightPanel.setPreferredSize(new Dimension(300, 0));
 
         JPanel paletteHeader = new JPanel(new BorderLayout(5, 5));
-        paletteHeader.add(new JLabel("方块调色板 (共45种)"), BorderLayout.WEST);
+        paletteHeader.add(new JLabel("方块调色板"), BorderLayout.WEST);
 
         JTextField searchField = new JTextField();
         searchField.setToolTipText("搜索方块名称或ID");
@@ -1041,11 +1044,11 @@ public class MapEditor extends JFrame {
     private void createPaletteButtons() {
         tilePalettePanel.removeAll();
 
-        for (int i = 0; i <= 44; i++) {
+        for (int i = 0; i < 1000; i++) {
             final int tileId = i;
             TileInfo tile = tileSet.getTile(tileId);
             if (tile == null)
-                continue;
+                break;
 
             JButton tileButton = new JButton(tile.getName());
             tileButton.setVerticalTextPosition(SwingConstants.BOTTOM);
@@ -1087,6 +1090,11 @@ public class MapEditor extends JFrame {
             }
         }
 
+        int count = tilePalettePanel.getComponentCount();
+        int requiredHeight = (int) Math.ceil(count / 4.0) * 90;
+        int requiredWidth = 4 * 80;
+        tilePalettePanel.setPreferredSize(new Dimension(requiredWidth, requiredHeight));
+
         tilePalettePanel.revalidate();
         tilePalettePanel.repaint();
     }
@@ -1094,11 +1102,11 @@ public class MapEditor extends JFrame {
     private void filterTiles(String filter) {
         tilePalettePanel.removeAll();
 
-        for (int i = 0; i <= 44; i++) {
+        for (int i = 0; i < MapData.getTileCount(); i++) {
             final int tileId = i;
             TileInfo tile = tileSet.getTile(tileId);
             if (tile == null)
-                continue;
+                break;
 
             if (filter != null && !filter.isEmpty() &&
                     !tile.getName().toLowerCase().contains(filter.toLowerCase()) &&
@@ -1143,6 +1151,11 @@ public class MapEditor extends JFrame {
 
             tilePalettePanel.add(tileButton);
         }
+
+        int count = tilePalettePanel.getComponentCount();
+        int requiredHeight = (int) Math.ceil(count / 4.0) * 90;
+        int requiredWidth = 4 * 80;
+        tilePalettePanel.setPreferredSize(new Dimension(requiredWidth, requiredHeight));
 
         tilePalettePanel.revalidate();
         tilePalettePanel.repaint();

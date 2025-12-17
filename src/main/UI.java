@@ -1130,10 +1130,23 @@ public class UI {
             g2.fillRect(checkX, checkY, 24, 24);
         }
 
+        // Collision Off
+        textY += gp.tileSize;
+        g2.drawString("Collision Off", textX, textY);
+        if (commandNum == 3) {
+            g2.drawString(">", textX - 25, textY);
+        }
+        // Checkbox
+        checkY = textY - 24;
+        g2.drawRect(checkX, checkY, 24, 24);
+        if (gp.keyH.collisionOff) {
+            g2.fillRect(checkX, checkY, 24, 24);
+        }
+
         // Back
         textY += gp.tileSize * 2;
         g2.drawString("Back", textX, textY);
-        if (commandNum == 3) {
+        if (commandNum == 4) {
             g2.drawString(">", textX - 25, textY);
         }
     }

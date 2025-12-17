@@ -12,6 +12,10 @@ public class CollisionChecker {
 
     public void checkTile(Entity entity) {// THIS CHECK ONLY TWO INTERACTING TILES
 
+        if (entity == gp.player && gp.keyH.collisionOff) {
+            return;
+        }
+
         int entityLeftWorldX = entity.worldX + entity.solidArea.x;
         int entityRightWorldX = entity.worldX + entity.solidArea.x + entity.solidArea.width;
         int entityTopWorldY = entity.worldY + entity.solidArea.y;
@@ -116,7 +120,9 @@ public class CollisionChecker {
                                 && player == true) {
                             // Player can pass through Air Wall
                         } else {
-                            entity.collisionOn = true;
+                            if (!(entity == gp.player && gp.keyH.collisionOff)) {
+                                entity.collisionOn = true;
+                            }
                         }
                     }
                     if (player == true) {
@@ -175,7 +181,9 @@ public class CollisionChecker {
 
                 if (entity.solidArea.intersects(target[gp.currentMap][i].solidArea)) {
                     if (target[gp.currentMap][i] != entity) {
-                        entity.collisionOn = true;
+                        if (!(entity == gp.player && gp.keyH.collisionOff)) {
+                            entity.collisionOn = true;
+                        }
                         index = i;
                     }
 

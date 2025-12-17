@@ -9,6 +9,7 @@ public class KeyHandler implements KeyListener {
     public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed, shotKeyPressed, spacePressed;
 
     public boolean godModeOn = false;
+    public boolean collisionOff = false;
     // DEBUG
     boolean checkDrawTime = false;
 
@@ -147,19 +148,6 @@ public class KeyHandler implements KeyListener {
             spacePressed = true;
         }
 
-        // DEBUG
-        if (code == KeyEvent.VK_R) {
-            switch (gp.currentMap) {
-                case 0:
-                    gp.tileM.loadMap("/maps/worldV3.txt", 0);
-                    break;
-                case 1:
-                    gp.tileM.loadMap("/maps/interior01.txt", 1);
-                    break;
-            }
-
-        }
-
         if (code == KeyEvent.VK_G) {
             gp.gameState = gp.debugState;
         }
@@ -181,13 +169,13 @@ public class KeyHandler implements KeyListener {
         if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
             gp.ui.commandNum--;
             if (gp.ui.commandNum < 0) {
-                gp.ui.commandNum = 3;
+                gp.ui.commandNum = 4;
             }
             gp.playSE(9);
         }
         if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
             gp.ui.commandNum++;
-            if (gp.ui.commandNum > 3) {
+            if (gp.ui.commandNum > 4) {
                 gp.ui.commandNum = 0;
             }
             gp.playSE(9);
@@ -215,6 +203,13 @@ public class KeyHandler implements KeyListener {
                 }
             }
             if (gp.ui.commandNum == 3) {
+                if (collisionOff == false) {
+                    collisionOff = true;
+                } else {
+                    collisionOff = false;
+                }
+            }
+            if (gp.ui.commandNum == 4) {
                 gp.gameState = gp.playState;
             }
         }
@@ -237,7 +232,7 @@ public class KeyHandler implements KeyListener {
 
     public void characterState(int code) {
 
-        if (code == KeyEvent.VK_C) {
+        if (code == KeyEvent.VK_C || code == KeyEvent.VK_ESCAPE) {
             gp.gameState = gp.playState;
         }
         if (code == KeyEvent.VK_ENTER) {
