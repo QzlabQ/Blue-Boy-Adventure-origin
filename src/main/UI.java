@@ -936,7 +936,7 @@ public class UI {
         }
 
         // buy an item
-        if (gp.keyH.enterPressed) {
+        if (gp.keyH.enterPressed && itemIndex < npc.inventory.size()) {
             if (npc.inventory.get(itemIndex).price > gp.player.coin) {
                 subState = 0;
                 gp.gameState = gp.dialogueState;

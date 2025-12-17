@@ -25,7 +25,7 @@ public class CollisionChecker {
         int tileNum1, tileNum2;
         // 先用一个临时方向，击退
         String direction = entity.direction;
-        if(entity.knockBack == true){
+        if (entity.knockBack == true) {
             direction = entity.knockBackDirection;
         }
 
@@ -68,7 +68,6 @@ public class CollisionChecker {
                 }
                 break;
         }
-        
 
     }
 
@@ -77,7 +76,7 @@ public class CollisionChecker {
         int index = 999;
 
         String direction = entity.direction;
-        if(entity.knockBack == true){
+        if (entity.knockBack == true) {
             direction = entity.knockBackDirection;
         }
 
@@ -113,7 +112,12 @@ public class CollisionChecker {
 
                 if (entity.solidArea.intersects(gp.obj[gp.currentMap][i].solidArea)) {
                     if (gp.obj[gp.currentMap][i].collision == true) {
-                        entity.collisionOn = true;
+                        if (gp.obj[gp.currentMap][i].name != null && gp.obj[gp.currentMap][i].name.equals("Air Wall")
+                                && player == true) {
+                            // Player can pass through Air Wall
+                        } else {
+                            entity.collisionOn = true;
+                        }
                     }
                     if (player == true) {
                         index = i;
@@ -136,7 +140,7 @@ public class CollisionChecker {
         int index = 999;
         // 先用一个临时方向，击退
         String direction = entity.direction;
-        if(entity.knockBack == true){
+        if (entity.knockBack == true) {
             direction = entity.knockBackDirection;
         }
         for (int i = 0; i < target[1].length; i++) {

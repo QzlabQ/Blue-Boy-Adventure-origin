@@ -193,7 +193,7 @@ public class AssetSetter {
 
                 Entity monster = createMonster(data.typeName);
                 if (monster != null) {
-                    if(monster.name.equals(MON_SkeletonLord.monName) && Progress.skeletonLordDefeated == true){
+                    if (monster.name.equals(MON_SkeletonLord.monName) && Progress.skeletonLordDefeated == true) {
                         index++;
                         continue;
                     }
@@ -235,6 +235,8 @@ public class AssetSetter {
             switch (typeName) {
                 case "OBJ_Boots":
                     return new OBJ_Boots(gp);
+                case "OBJ_AirWall":
+                    return new OBJ_AirWall(gp);
                 case "OBJ_Chest":
                     return new OBJ_Chest(gp);
                 case "OBJ_Axe":
