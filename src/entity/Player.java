@@ -561,12 +561,12 @@ public class Player extends Entity {
             Entity selectedItem = inventory.get(itemIndex);
 
             if (selectedItem.type == type_boots) {
-                if (currentLight == selectedItem) {
+                if (currentBoots == selectedItem) {
                     speed -= 2;
-                    currentLight = null;
+                    currentBoots = null;
                 } else {
-                    speed+=2;
-                    currentLight = selectedItem;
+                    speed += 2;
+                    currentBoots = selectedItem;
                 }
 
             }
