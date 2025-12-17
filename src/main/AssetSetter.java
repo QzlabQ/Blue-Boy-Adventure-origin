@@ -151,6 +151,7 @@ public class AssetSetter {
                 }
             }
         }
+
     }
 
     // 加载NPC类实体

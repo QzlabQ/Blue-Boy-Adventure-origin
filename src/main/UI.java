@@ -471,7 +471,7 @@ public class UI {
             // EQUIP CURSOR
             if (entity.inventory.get(i) == entity.currentWeapon ||
                     entity.inventory.get(i) == entity.currentShield
-                    || entity.inventory.get(i) == entity.currentLight) {
+                    || entity.inventory.get(i) == entity.currentLight || entity.inventory.get(i) == entity.currentBoots) {
                 g2.setColor(new Color(240, 190, 90));
                 g2.fillRoundRect(slotX, slotY, gp.tileSize, gp.tileSize, 10, 10);
             }

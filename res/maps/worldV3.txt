@@ -100,3 +100,4 @@ IT,IT_DryTree,13,40
 MON,MON_RedSlime,37,9
 MON,MON_RedSlime,36,11
 MON,MON_RedSlime,40,10
+OBJ,OBJ_Boots,23,17

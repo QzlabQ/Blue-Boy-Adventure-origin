@@ -21,6 +21,7 @@ public class Player extends Entity {
     int standCounter = 0;
     public boolean attackCanceled = false;
     public boolean lightUpdated = false;
+    public boolean bootsEquipped = false;
 
     public Player(GamePanel gp, KeyHandler keyH) {
 
@@ -559,6 +560,16 @@ public class Player extends Entity {
 
             Entity selectedItem = inventory.get(itemIndex);
 
+            if (selectedItem.type == type_boots) {
+                if (currentLight == selectedItem) {
+                    speed -= 2;
+                    currentLight = null;
+                } else {
+                    speed+=2;
+                    currentLight = selectedItem;
+                }
+
+            }
             if (selectedItem.type == type_sword || selectedItem.type == type_axe || selectedItem.type == type_pickaxe) {
 
                 currentWeapon = selectedItem;
