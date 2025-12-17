@@ -67,6 +67,10 @@ public class KeyHandler implements KeyListener {
         else if (gp.gameState == gp.mapState) {
             mapState(code);
         }
+        // debug state
+        else if (gp.gameState == gp.debugState) {
+            debugState(code);
+        }
     }
 
     public void titleState(int code) {
@@ -144,13 +148,6 @@ public class KeyHandler implements KeyListener {
         }
 
         // DEBUG
-        if (code == KeyEvent.VK_T) {
-            if (checkDrawTime == false) {
-                checkDrawTime = true;
-            } else if (checkDrawTime == true) {
-                checkDrawTime = false;
-            }
-        }
         if (code == KeyEvent.VK_R) {
             switch (gp.currentMap) {
                 case 0:
@@ -164,13 +161,10 @@ public class KeyHandler implements KeyListener {
         }
 
         if (code == KeyEvent.VK_G) {
-            if (godModeOn == false) {
-                godModeOn = true;
-            } else if (godModeOn == true) {
-                godModeOn = false;
-            }
+            gp.gameState = gp.debugState;
         }
     }
+
     public void cutsceneState(int code) {
         if (code == KeyEvent.VK_ENTER) {
             enterPressed = true; // 只记录按键，不切状态！
@@ -179,6 +173,52 @@ public class KeyHandler implements KeyListener {
 
     public void mapState(int code) {
         if (code == KeyEvent.VK_M) {
+            gp.gameState = gp.playState;
+        }
+    }
+
+    public void debugState(int code) {
+        if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+            gp.ui.commandNum--;
+            if (gp.ui.commandNum < 0) {
+                gp.ui.commandNum = 3;
+            }
+            gp.playSE(9);
+        }
+        if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+            gp.ui.commandNum++;
+            if (gp.ui.commandNum > 3) {
+                gp.ui.commandNum = 0;
+            }
+            gp.playSE(9);
+        }
+        if (code == KeyEvent.VK_ENTER) {
+            if (gp.ui.commandNum == 0) {
+                if (godModeOn == false) {
+                    godModeOn = true;
+                } else {
+                    godModeOn = false;
+                }
+            }
+            if (gp.ui.commandNum == 1) {
+                if (checkDrawTime == false) {
+                    checkDrawTime = true;
+                } else {
+                    checkDrawTime = false;
+                }
+            }
+            if (gp.ui.commandNum == 2) {
+                if (gp.tileM.drawPath == false) {
+                    gp.tileM.drawPath = true;
+                } else {
+                    gp.tileM.drawPath = false;
+                }
+            }
+            if (gp.ui.commandNum == 3) {
+                gp.gameState = gp.playState;
+            }
+        }
+        if (code == KeyEvent.VK_ESCAPE) {
             gp.gameState = gp.playState;
         }
     }

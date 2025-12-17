@@ -95,6 +95,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int sleepState = 9;
     public final int mapState = 10;
     public final int cutsceneState = 11;
+    public final int debugState = 12;
 
     public boolean bossBattleOn = false;
 
@@ -406,10 +407,11 @@ public class GamePanel extends JPanel implements Runnable {
         aSetter.setMonster();
         aSetter.setNPC();
     }
+
     public void removeTempEntity() {
-        for(int mapNum = 0; mapNum < maxMap; mapNum++){
-            for(int i = 0; i < obj[1].length; i++){
-                if(obj[mapNum][i] != null && obj[mapNum][i].temp == true){
+        for (int mapNum = 0; mapNum < maxMap; mapNum++) {
+            for (int i = 0; i < obj[1].length; i++) {
+                if (obj[mapNum][i] != null && obj[mapNum][i].temp == true) {
                     obj[mapNum][i] = null;
                 }
             }
