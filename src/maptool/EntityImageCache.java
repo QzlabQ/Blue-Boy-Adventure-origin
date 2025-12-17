@@ -11,10 +11,10 @@ public class EntityImageCache {
 
     public void loadEntityImages() {
         String[] entityTypes = {
-                "OBJ_Coin_Bronze","OBJ_Blueheart", "OBJ_Key", "OBJ_Tent", "OBJ_Axe", "OBJ_Shield_Blue",
+                "OBJ_Coin_Bronze", "OBJ_Blueheart", "OBJ_Key", "OBJ_Tent", "OBJ_Axe", "OBJ_Shield_Blue",
                 "OBJ_Potion_Red", "OBJ_ManaCrystal", "OBJ_Door", "OBJ_Chest", "OBJ_Lantern",
                 "OBJ_Pickaxe", "OBJ_Door_Iron", "OBJ_Heart", "OBJ_Fireball", "OBJ_Rock",
-                "OBJ_Sword_Normal", "OBJ_Boots",
+                "OBJ_Sword_Normal", "OBJ_Boots", "OBJ_AirWall",
                 "NPC_OldMan", "NPC_Merchant", "NPC_BigRock",
                 "MON_GreenSlime", "MON_Orc", "MON_Bat", "MON_RedSlime", "MON_SkeletonLord",
                 "IT_DryTree", "IT_DestructibleWall", "IT_MetalPlate", "IT_Trunk"
@@ -74,6 +74,8 @@ public class EntityImageCache {
                 return "res/objects/sword_normal.png";
             case "OBJ_Boots":
                 return "res/objects/boots.png";
+            case "OBJ_AirWall":
+                return "res/objects/airwall.png";
 
             case "NPC_OldMan":
                 return "res/npc/oldman_down_1.png";

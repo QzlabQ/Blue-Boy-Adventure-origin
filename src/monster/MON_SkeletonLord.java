@@ -8,6 +8,8 @@ import object.OBJ_Door_Iron;
 import object.OBJ_Heart;
 import object.OBJ_ManaCrystal;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.Random;
 
 import data.Progress;
@@ -62,7 +64,7 @@ public class MON_SkeletonLord extends Entity {
 
     public void getImage() {
         int i = 5;
-        if(inRage == false){
+        if (inRage == false) {
             up1 = setup("/monster/skeletonlord_up_1", gp.tileSize * i, gp.tileSize * i);
             up2 = setup("/monster/skeletonlord_up_2", gp.tileSize * i, gp.tileSize * i);
             down1 = setup("/monster/skeletonlord_down_1", gp.tileSize * i, gp.tileSize * i);
@@ -71,7 +73,7 @@ public class MON_SkeletonLord extends Entity {
             left2 = setup("/monster/skeletonlord_left_2", gp.tileSize * i, gp.tileSize * i);
             right1 = setup("/monster/skeletonlord_right_1", gp.tileSize * i, gp.tileSize * i);
             right2 = setup("/monster/skeletonlord_right_2", gp.tileSize * i, gp.tileSize * i);
-        }else{
+        } else {
             up1 = setup("/monster/skeletonlord_phase2_up_1", gp.tileSize * i, gp.tileSize * i);
             up2 = setup("/monster/skeletonlord_phase2_up_2", gp.tileSize * i, gp.tileSize * i);
             down1 = setup("/monster/skeletonlord_phase2_down_1", gp.tileSize * i, gp.tileSize * i);
@@ -85,7 +87,7 @@ public class MON_SkeletonLord extends Entity {
 
     public void getAttackImage() {
         int i = 5;
-        if(inRage == false){
+        if (inRage == false) {
             attackUp1 = setup("/monster/skeletonlord_attack_up_1", gp.tileSize * i, gp.tileSize * 2 * i);
             attackUp2 = setup("/monster/skeletonlord_attack_up_2", gp.tileSize * i, gp.tileSize * 2 * i);
             attackDown1 = setup("/monster/skeletonlord_attack_down_1", gp.tileSize * i, gp.tileSize * 2 * i);
@@ -94,7 +96,7 @@ public class MON_SkeletonLord extends Entity {
             attackLeft2 = setup("/monster/skeletonlord_attack_left_2", gp.tileSize * 2 * i, gp.tileSize * i);
             attackRight1 = setup("/monster/skeletonlord_attack_right_1", gp.tileSize * 2 * i, gp.tileSize * i);
             attackRight2 = setup("/monster/skeletonlord_attack_right_2", gp.tileSize * 2 * i, gp.tileSize * i);
-        }else{
+        } else {
             attackUp1 = setup("/monster/skeletonlord_phase2_attack_up_1", gp.tileSize * i, gp.tileSize * 2 * i);
             attackUp2 = setup("/monster/skeletonlord_phase2_attack_up_2", gp.tileSize * i, gp.tileSize * 2 * i);
             attackDown1 = setup("/monster/skeletonlord_phase2_attack_down_1", gp.tileSize * i, gp.tileSize * 2 * i);
@@ -103,12 +105,12 @@ public class MON_SkeletonLord extends Entity {
             attackLeft2 = setup("/monster/skeletonlord_phase2_attack_left_2", gp.tileSize * 2 * i, gp.tileSize * i);
             attackRight1 = setup("/monster/skeletonlord_phase2_attack_right_1", gp.tileSize * 2 * i, gp.tileSize * i);
             attackRight2 = setup("/monster/skeletonlord_phase2_attack_right_2", gp.tileSize * 2 * i, gp.tileSize * i);
-            
+
         }
 
     }
 
-    public void setDialogue(){
+    public void setDialogue() {
         dialogues[0] = "No one can steal my treasure!";
         dialogues[1] = "You will DIE here!";
         dialogues[2] = "WELCOME TO YOUR DOOM!";
@@ -117,23 +119,23 @@ public class MON_SkeletonLord extends Entity {
     public void setAction() {
 
         if (sleep == true) {
-            return; 
+            return;
         }
         // 二阶段：血量折半时，移速加快，攻击加倍
-        if(inRage == false && life < maxLife / 2){
+        if (inRage == false && life < maxLife / 2) {
             inRage = true;
             getImage();
             getAttackImage();
             defaultSpeed++;
             speed = defaultSpeed;
-            attack *= 2; 
+            attack *= 2;
         }
         if (getTileDistance(gp.player) < 10) {
             moveTowordPlayer(60);
         } else {
             getRandomDirection(120);
         }
-        if(attacking == false){
+        if (attacking == false) {
             // 靠近boss才会追
             checkAttackOrNot(60, gp.tileSize * 7, gp.tileSize * 5);
         }
@@ -150,8 +152,8 @@ public class MON_SkeletonLord extends Entity {
         gp.playMusic(19);
         Progress.skeletonLordDefeated = true;
 
-        for(int i = 0; i < gp.obj[1].length; i++){
-            if(gp.obj[gp.currentMap][i] != null && gp.obj[gp.currentMap][i].name.equals(OBJ_Door_Iron.objName)){
+        for (int i = 0; i < gp.obj[1].length; i++) {
+            if (gp.obj[gp.currentMap][i] != null && gp.obj[gp.currentMap][i].name.equals(OBJ_Door_Iron.objName)) {
                 gp.playSE(21);
                 gp.obj[gp.currentMap][i] = null;
             }
@@ -179,6 +181,46 @@ public class MON_SkeletonLord extends Entity {
         }
         if (i >= 75 && i < 100) {
             dropItem(new OBJ_ManaCrystal(gp));
+        }
+    }
+
+    @Override
+    public void draw(Graphics2D g2) {
+        super.draw(g2);
+
+        if (attacking && spriteCounter < motion1_duration) {
+            int tempWorldX = worldX;
+            int tempWorldY = worldY;
+
+            switch (direction) {
+                case "up":
+                    tempWorldY -= attackArea.height;
+                    break;
+                case "down":
+                    tempWorldY += attackArea.height;
+                    break;
+                case "left":
+                    tempWorldX -= attackArea.width;
+                    break;
+                case "right":
+                    tempWorldX += attackArea.width;
+                    break;
+            }
+
+            int screenX = tempWorldX - gp.player.worldX + gp.player.screenX;
+            int screenY = tempWorldY - gp.player.worldY + gp.player.screenY;
+
+            int drawX = screenX + solidArea.x;
+            int drawY = screenY + solidArea.y;
+            int drawWidth = attackArea.width;
+            int drawHeight = attackArea.height;
+
+            if (spriteCounter % 10 < 5) {
+                g2.setColor(new Color(255, 0, 0, 100));
+                g2.fillRect(drawX, drawY, drawWidth, drawHeight);
+                g2.setColor(Color.RED);
+                g2.drawRect(drawX, drawY, drawWidth, drawHeight);
+            }
         }
     }
 }

@@ -23,6 +23,7 @@ public class OBJ_Fireball extends Projectile {
         knockBackPower = 5;
         useCost = 1;
         alive = false;
+        lightRadius = 125;
         getImage();
 
     }

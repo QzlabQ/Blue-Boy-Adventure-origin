@@ -7,10 +7,11 @@
 - [x]  Loadgame之后打开地牢的箱子游戏会炸
 - [ ]  格挡（parry & defence 区别）（fauci）
 - [x]  石头推行
-- [ ]  fire ball lighting (胡)
+- [x]  fire ball lighting (胡)
 - [x]  fire ball damage
-- [ ]  boss攻击范围的提示
-- [ ]  空气墙阻挡npc进入关键区域
+- [x]  boss攻击范围的提示
+- [x]  空气墙阻挡npc进入关键区域
+- [x]  时间显示，绘制路径和开启无敌改为可以开关的调试功能，按G进入设置菜单
 
 > 火球伤害已加强，伤害随等级升高（`entity/projectile.java` 第30行，伤害自定义为`attack * (gp.player.level * 2)`）
 
@@ -18,7 +19,7 @@
 - [ ]  最小化后，key一直输入（有机会？）
 - [x]  增加assets editor (已经完成，集成在MapEditor中；地图文件的格式也同步更新了)
 - [ ]  制作展示视频（游戏引擎，mapeditor，...）
-- [ ]  检查新tile的添加方法
+- [x]  检查新tile的添加方法
 - [x]  boss battle
 - [ ]  改改游戏文案，有点特色、剧情什么的。当然可以让ai跑
 - [ ]  `monster/MON_SkeletonLord` 里面有石山代码，不过鉴于宝石只用一次，就不太想修这个了。当然可以修复成那种放入地图编辑器的那种，不过好像也没啥必要了
@@ -57,6 +58,6 @@ if (gp.iTile[gp.currentMap][i].life == 0) {
 }
 ```
 
-3. 按 G 开无敌
+3. 按 G 进入调试菜单，可以开关调试功能
 4. `environment/Light.java` 可以把屏幕上的时间注释掉
 5. `main/eventHandler` 75 76 行跳关，理论上应该是，`主世界->地牢一层->地牢二层`， 为方便体验游戏内容可以改成 `主世界->地牢二层`

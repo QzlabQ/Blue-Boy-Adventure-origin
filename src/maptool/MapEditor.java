@@ -1,6 +1,9 @@
 package maptool;
 
 import javax.swing.*;
+
+import main.MapData;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -724,7 +727,7 @@ public class MapEditor extends JFrame {
         rightPanel.setPreferredSize(new Dimension(300, 0));
 
         JPanel paletteHeader = new JPanel(new BorderLayout(5, 5));
-        paletteHeader.add(new JLabel("方块调色板 (共45种)"), BorderLayout.WEST);
+        paletteHeader.add(new JLabel("方块调色板"), BorderLayout.WEST);
 
         JTextField searchField = new JTextField();
         searchField.setToolTipText("搜索方块名称或ID");
@@ -739,7 +742,7 @@ public class MapEditor extends JFrame {
 
         tilePalettePanel = new JPanel();
         tilePalettePanel.setLayout(new GridLayout(0, 4, 3, 3));
-        
+
         // 设置首选尺寸以确保滚动条能正常工作
         // 计算所需高度：每个按钮85像素高，每行4个按钮，共45个按钮需要约12行
         int requiredHeight = (int) Math.ceil(45.0 / 4) * 90; // 每个按钮高度+垂直间距
@@ -767,7 +770,7 @@ public class MapEditor extends JFrame {
         JPanel paletteContainer = new JPanel(new BorderLayout());
         paletteContainer.add(paletteHeader, BorderLayout.NORTH);
         paletteContainer.add(paletteScrollPane, BorderLayout.CENTER);
-        
+
         // 修改 modePanel 的事件监听器，添加显示/隐藏逻辑
         editModeRadio.addActionListener(e -> {
             setEditMode();
@@ -818,7 +821,7 @@ public class MapEditor extends JFrame {
                 "NPC_BigRock", "NPC_Merchant", "NPC_OldMan",
 
                 // OBJ 类型 (可交互对象)
-                "OBJ_Axe", "OBJ_Boots", "OBJ_Chest", "OBJ_Coin_Bronze", "OBJ_Door",
+                "OBJ_AirWall", "OBJ_Axe", "OBJ_Boots", "OBJ_Chest", "OBJ_Coin_Bronze", "OBJ_Door",
                 "OBJ_Door_Iron", "OBJ_Fireball", "OBJ_Heart", "OBJ_Key", "OBJ_Lantern",
                 "OBJ_ManaCrystal", "OBJ_Pickaxe", "OBJ_Potion_Red", "OBJ_Rock",
                 "OBJ_Shield_Blue", "OBJ_Sword_Normal", "OBJ_Tent"
@@ -1041,11 +1044,11 @@ public class MapEditor extends JFrame {
     private void createPaletteButtons() {
         tilePalettePanel.removeAll();
 
-        for (int i = 0; i <= 44; i++) {
+        for (int i = 0; i < 1000; i++) {
             final int tileId = i;
             TileInfo tile = tileSet.getTile(tileId);
             if (tile == null)
-                continue;
+                break;
 
             JButton tileButton = new JButton(tile.getName());
             tileButton.setVerticalTextPosition(SwingConstants.BOTTOM);
@@ -1087,6 +1090,11 @@ public class MapEditor extends JFrame {
             }
         }
 
+        int count = tilePalettePanel.getComponentCount();
+        int requiredHeight = (int) Math.ceil(count / 4.0) * 90;
+        int requiredWidth = 4 * 80;
+        tilePalettePanel.setPreferredSize(new Dimension(requiredWidth, requiredHeight));
+
         tilePalettePanel.revalidate();
         tilePalettePanel.repaint();
     }
@@ -1094,11 +1102,11 @@ public class MapEditor extends JFrame {
     private void filterTiles(String filter) {
         tilePalettePanel.removeAll();
 
-        for (int i = 0; i <= 44; i++) {
+        for (int i = 0; i < MapData.getTileCount(); i++) {
             final int tileId = i;
             TileInfo tile = tileSet.getTile(tileId);
             if (tile == null)
-                continue;
+                break;
 
             if (filter != null && !filter.isEmpty() &&
                     !tile.getName().toLowerCase().contains(filter.toLowerCase()) &&
@@ -1143,6 +1151,11 @@ public class MapEditor extends JFrame {
 
             tilePalettePanel.add(tileButton);
         }
+
+        int count = tilePalettePanel.getComponentCount();
+        int requiredHeight = (int) Math.ceil(count / 4.0) * 90;
+        int requiredWidth = 4 * 80;
+        tilePalettePanel.setPreferredSize(new Dimension(requiredWidth, requiredHeight));
 
         tilePalettePanel.revalidate();
         tilePalettePanel.repaint();

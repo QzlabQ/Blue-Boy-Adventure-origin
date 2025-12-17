@@ -12,6 +12,10 @@ public class CollisionChecker {
 
     public void checkTile(Entity entity) {// THIS CHECK ONLY TWO INTERACTING TILES
 
+        if (entity == gp.player && gp.keyH.collisionOff) {
+            return;
+        }
+
         int entityLeftWorldX = entity.worldX + entity.solidArea.x;
         int entityRightWorldX = entity.worldX + entity.solidArea.x + entity.solidArea.width;
         int entityTopWorldY = entity.worldY + entity.solidArea.y;
@@ -25,7 +29,7 @@ public class CollisionChecker {
         int tileNum1, tileNum2;
         // 先用一个临时方向，击退
         String direction = entity.direction;
-        if(entity.knockBack == true){
+        if (entity.knockBack == true) {
             direction = entity.knockBackDirection;
         }
 
@@ -68,7 +72,6 @@ public class CollisionChecker {
                 }
                 break;
         }
-        
 
     }
 
@@ -77,7 +80,7 @@ public class CollisionChecker {
         int index = 999;
 
         String direction = entity.direction;
-        if(entity.knockBack == true){
+        if (entity.knockBack == true) {
             direction = entity.knockBackDirection;
         }
 
@@ -113,7 +116,14 @@ public class CollisionChecker {
 
                 if (entity.solidArea.intersects(gp.obj[gp.currentMap][i].solidArea)) {
                     if (gp.obj[gp.currentMap][i].collision == true) {
-                        entity.collisionOn = true;
+                        if (gp.obj[gp.currentMap][i].name != null && gp.obj[gp.currentMap][i].name.equals("Air Wall")
+                                && player == true) {
+                            // Player can pass through Air Wall
+                        } else {
+                            if (!(entity == gp.player && gp.keyH.collisionOff)) {
+                                entity.collisionOn = true;
+                            }
+                        }
                     }
                     if (player == true) {
                         index = i;
@@ -136,7 +146,7 @@ public class CollisionChecker {
         int index = 999;
         // 先用一个临时方向，击退
         String direction = entity.direction;
-        if(entity.knockBack == true){
+        if (entity.knockBack == true) {
             direction = entity.knockBackDirection;
         }
         for (int i = 0; i < target[1].length; i++) {
@@ -171,7 +181,9 @@ public class CollisionChecker {
 
                 if (entity.solidArea.intersects(target[gp.currentMap][i].solidArea)) {
                     if (target[gp.currentMap][i] != entity) {
-                        entity.collisionOn = true;
+                        if (!(entity == gp.player && gp.keyH.collisionOff)) {
+                            entity.collisionOn = true;
+                        }
                         index = i;
                     }
 

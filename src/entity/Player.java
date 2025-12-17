@@ -5,10 +5,9 @@ import java.awt.image.BufferedImage;
 
 import main.GamePanel;
 import main.KeyHandler;
-import object.OBJ_Axe;
+import object.OBJ_AirWall;
 import object.OBJ_Fireball;
 import object.OBJ_Key;
-import object.OBJ_Lantern;
 import object.OBJ_Shield_Wood;
 import object.OBJ_Sword_Normal;
 
@@ -410,8 +409,10 @@ public class Player extends Entity {
                 gp.obj[gp.currentMap][i] = null;
             } else if (gp.obj[gp.currentMap][i].type == type_obstacle) {
                 if (keyH.enterPressed) {
-                    attackCanceled = true;
-                    gp.obj[gp.currentMap][i].interact();
+                    if (gp.obj[gp.currentMap][i] instanceof OBJ_AirWall == false) {
+                        attackCanceled = true;
+                        gp.obj[gp.currentMap][i].interact();
+                    }
                 }
             }
             // INVENTORY ITEMS
@@ -737,7 +738,7 @@ public class Player extends Entity {
         if (transparent == true) {
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
         }
-        if(drawing == true){
+        if (drawing == true) {
             g2.drawImage(image, tempScreenX, tempScreenY, null);
         }
 

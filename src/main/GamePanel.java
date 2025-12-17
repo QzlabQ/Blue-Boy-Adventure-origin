@@ -72,11 +72,11 @@ public class GamePanel extends JPanel implements Runnable {
 
     // PLAYER & OBJECT
     public Player player = new Player(this, keyH);
-    public Entity obj[][] = new Entity[maxMap][20];
-    public Entity npc[][] = new Entity[maxMap][10];
-    public Entity monster[][] = new Entity[maxMap][20];
-    public InteractiveTile iTile[][] = new InteractiveTile[maxMap][50];
-    public Entity projectile[][] = new Entity[maxMap][20];
+    public Entity obj[][] = new Entity[maxMap][200];
+    public Entity npc[][] = new Entity[maxMap][100];
+    public Entity monster[][] = new Entity[maxMap][200];
+    public InteractiveTile iTile[][] = new InteractiveTile[maxMap][500];
+    public Entity projectile[][] = new Entity[maxMap][200];
     // public ArrayList<Entity> projectileList = new ArrayList<>();
     public ArrayList<Entity> particleList = new ArrayList<>();
     ArrayList<Entity> entityList = new ArrayList<>();
@@ -95,6 +95,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int sleepState = 9;
     public final int mapState = 10;
     public final int cutsceneState = 11;
+    public final int debugState = 12;
 
     public boolean bossBattleOn = false;
 
@@ -406,10 +407,11 @@ public class GamePanel extends JPanel implements Runnable {
         aSetter.setMonster();
         aSetter.setNPC();
     }
+
     public void removeTempEntity() {
-        for(int mapNum = 0; mapNum < maxMap; mapNum++){
-            for(int i = 0; i < obj[1].length; i++){
-                if(obj[mapNum][i] != null && obj[mapNum][i].temp == true){
+        for (int mapNum = 0; mapNum < maxMap; mapNum++) {
+            for (int i = 0; i < obj[1].length; i++) {
+                if (obj[mapNum][i] != null && obj[mapNum][i].temp == true) {
                     obj[mapNum][i] = null;
                 }
             }

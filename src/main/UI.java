@@ -113,8 +113,11 @@ public class UI {
             drawTradeScreen();
         }
         //
-        if(gp.gameState == gp.sleepState){
+        if (gp.gameState == gp.sleepState) {
             drawSleepScreen();
+        }
+        if (gp.gameState == gp.debugState) {
+            drawDebugScreen();
         }
     }
 
@@ -196,7 +199,7 @@ public class UI {
                 }
                 // 情况 2: Boss (Boss 血条通常不需要 inCamera 判断，只要Boss活着就显示在屏幕固定位置)
                 else if (monster.boss && monster.sleep == false) {
-                    
+
                     double oneScale = (double) gp.tileSize * 8 / monster.maxLife;
                     double hyBarValue = oneScale * monster.life;
 
@@ -244,54 +247,53 @@ public class UI {
 
     public void drawTitleScreen() {
 
+        g2.setColor(new Color(0, 0, 0));
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
 
-            g2.setColor(new Color(0, 0, 0));
-            g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+        // TITLE NAME
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 76F));
+        String text = "Blue Boy Adventure";
+        int x = getXforCenteredText(text);
+        int y = gp.tileSize * 3;
 
-            // TITLE NAME
-            g2.setFont(g2.getFont().deriveFont(Font.BOLD, 76F));
-            String text = "Blue Boy Adventure";
-            int x = getXforCenteredText(text);
-            int y = gp.tileSize * 3;
+        // SHADOW
+        g2.setColor(Color.gray);
+        g2.drawString(text, x + 5, y + 5);
+        // MAIN COLOR
+        g2.setColor(Color.white);
+        g2.drawString(text, x, y);
 
-            // SHADOW
-            g2.setColor(Color.gray);
-            g2.drawString(text, x + 5, y + 5);
-            // MAIN COLOR
-            g2.setColor(Color.white);
-            g2.drawString(text, x, y);
+        // BLUE BOY IMAGE
+        x = gp.screenWidth / 2 - (gp.tileSize * 2) / 2;
+        y += gp.tileSize * 2;
+        g2.drawImage(gp.player.down1, x, y, gp.tileSize * 2, gp.tileSize * 2, null);
 
-            // BLUE BOY IMAGE
-            x = gp.screenWidth / 2 - (gp.tileSize * 2) / 2;
-            y += gp.tileSize * 2;
-            g2.drawImage(gp.player.down1, x, y, gp.tileSize * 2, gp.tileSize * 2, null);
+        // MENU
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 48F));
 
-            // MENU
-            g2.setFont(g2.getFont().deriveFont(Font.BOLD, 48F));
+        text = "NEW GAME";
+        x = getXforCenteredText(text);
+        y += gp.tileSize * 3.5;
+        g2.drawString(text, x, y);
+        if (commandNum == 0) {
+            g2.drawString(">", x - gp.tileSize, y);
+        }
 
-            text = "NEW GAME";
-            x = getXforCenteredText(text);
-            y += gp.tileSize * 3.5;
-            g2.drawString(text, x, y);
-            if (commandNum == 0) {
-                g2.drawString(">", x - gp.tileSize, y);
-            }
+        text = "LOAD GAME";
+        x = getXforCenteredText(text);
+        y += gp.tileSize;
+        g2.drawString(text, x, y);
+        if (commandNum == 1) {
+            g2.drawString(">", x - gp.tileSize, y);
+        }
 
-            text = "LOAD GAME";
-            x = getXforCenteredText(text);
-            y += gp.tileSize;
-            g2.drawString(text, x, y);
-            if (commandNum == 1) {
-                g2.drawString(">", x - gp.tileSize, y);
-            }
-
-            text = "QUIT";
-            x = getXforCenteredText(text);
-            y += gp.tileSize;
-            g2.drawString(text, x, y);
-            if (commandNum == 2) {
-                g2.drawString(">", x - gp.tileSize, y);
-            }
+        text = "QUIT";
+        x = getXforCenteredText(text);
+        y += gp.tileSize;
+        g2.drawString(text, x, y);
+        if (commandNum == 2) {
+            g2.drawString(">", x - gp.tileSize, y);
+        }
 
     }
 
@@ -934,7 +936,7 @@ public class UI {
         }
 
         // buy an item
-        if (gp.keyH.enterPressed) {
+        if (gp.keyH.enterPressed && itemIndex < npc.inventory.size()) {
             if (npc.inventory.get(itemIndex).price > gp.player.coin) {
                 subState = 0;
                 gp.gameState = gp.dialogueState;
@@ -1014,17 +1016,17 @@ public class UI {
 
     }
 
-    public void drawSleepScreen(){
+    public void drawSleepScreen() {
         counter++;
-        if(counter < 120){
+        if (counter < 120) {
             gp.eManager.lighting.filterAlpha += 0.01f;
-            if(gp.eManager.lighting.filterAlpha > 1f){
+            if (gp.eManager.lighting.filterAlpha > 1f) {
                 gp.eManager.lighting.filterAlpha = 1f;
             }
         }
-        if(counter >= 120){
+        if (counter >= 120) {
             gp.eManager.lighting.filterAlpha -= 0.01f;
-            if(gp.eManager.lighting.filterAlpha <= 0f){
+            if (gp.eManager.lighting.filterAlpha <= 0f) {
                 gp.eManager.lighting.filterAlpha = 0f;
                 counter = 0;
                 gp.eManager.lighting.dayState = gp.eManager.lighting.day;
@@ -1034,7 +1036,7 @@ public class UI {
             }
         }
     }
-    
+
     public int getItemIndexOnslot(int slotCol, int slotRow) {
         int itemIndex = slotCol + (slotRow * 5);
         return itemIndex;
@@ -1064,6 +1066,89 @@ public class UI {
         int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
         int x = tailX - length;
         return x;
+    }
+
+    public void drawDebugScreen() {
+        g2.setColor(Color.white);
+        g2.setFont(g2.getFont().deriveFont(32F));
+
+        // sub window
+        int frameX = gp.tileSize * 6;
+        int frameY = gp.tileSize;
+        int frameWidth = gp.tileSize * 8;
+        int frameHeight = gp.tileSize * 10;
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
+
+        int textX;
+        int textY;
+
+        // title
+        String text = "Debug Menu";
+        textX = getXforCenteredText(text);
+        textY = frameY + gp.tileSize;
+        g2.drawString(text, textX, textY);
+
+        // God Mode
+        textX = frameX + gp.tileSize;
+        textY = frameY + gp.tileSize * 2;
+        g2.drawString("God Mode", textX, textY);
+        if (commandNum == 0) {
+            g2.drawString(">", textX - 25, textY);
+        }
+        // Checkbox
+        int checkX = frameX + (int) (gp.tileSize * 5.5);
+        int checkY = textY - 24;
+        g2.setStroke(new BasicStroke(3));
+        g2.drawRect(checkX, checkY, 24, 24);
+        if (gp.keyH.godModeOn) {
+            g2.fillRect(checkX, checkY, 24, 24);
+        }
+
+        // Draw Time
+        textY += gp.tileSize;
+        g2.drawString("Draw Time", textX, textY);
+        if (commandNum == 1) {
+            g2.drawString(">", textX - 25, textY);
+        }
+        // Checkbox
+        checkY = textY - 24;
+        g2.drawRect(checkX, checkY, 24, 24);
+        if (gp.keyH.checkDrawTime) {
+            g2.fillRect(checkX, checkY, 24, 24);
+        }
+
+        // Draw Path
+        textY += gp.tileSize;
+        g2.drawString("Draw Path", textX, textY);
+        if (commandNum == 2) {
+            g2.drawString(">", textX - 25, textY);
+        }
+        // Checkbox
+        checkY = textY - 24;
+        g2.drawRect(checkX, checkY, 24, 24);
+        if (gp.tileM.drawPath) {
+            g2.fillRect(checkX, checkY, 24, 24);
+        }
+
+        // Collision Off
+        textY += gp.tileSize;
+        g2.drawString("Collision Off", textX, textY);
+        if (commandNum == 3) {
+            g2.drawString(">", textX - 25, textY);
+        }
+        // Checkbox
+        checkY = textY - 24;
+        g2.drawRect(checkX, checkY, 24, 24);
+        if (gp.keyH.collisionOff) {
+            g2.fillRect(checkX, checkY, 24, 24);
+        }
+
+        // Back
+        textY += gp.tileSize * 2;
+        g2.drawString("Back", textX, textY);
+        if (commandNum == 4) {
+            g2.drawString(">", textX - 25, textY);
+        }
     }
 
 }
