@@ -4,7 +4,7 @@ import main.GamePanel;
 import adapter.GamePanelAdapter;
 
 /**
- * Game - 应用主入口类
+ * Game - Application Main Entry Class
  * 
  * 这是新的应用入口，替代旧的 Main.java
  * 职责：

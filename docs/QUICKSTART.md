@@ -42,41 +42,50 @@
 ### ✅ 已完成（阶段一）
 
 #### 任务 1.1: 事件系统基础包 ✅
+
 **完成日期**：2026-02-28  
 **文件**：
+
 - `src/core/event/GameEvent.java` - 事件基类
 - `src/core/event/GameEventType.java` - 事件类型枚举
 - `src/core/event/EventListener.java` - 监听器接口
 - `src/core/event/EventBus.java` - 事件总线（单例）
 
 **验收标准**：
+
 - ✅ 编译无错
 - ✅ EventBus 单例正常工作
 - ✅ 订阅/发布机制正常
 - ✅ 不影响现有 v1 代码
 
 #### 任务 1.2: 状态管理系统 ✅
+
 **完成日期**：2026-02-28  
 **文件**：
+
 - `src/core/state/GameStateType.java` - 状态类型枚举
 - `src/core/state/GameState.java` - 状态接口
 - `src/core/state/AbstractGameState.java` - 状态抽象基类
 - `src/core/state/GameStateManager.java` - 状态管理器（单例）
 
 **验收标准**：
+
 - ✅ 编译无错
 - ✅ 状态切换正常
 - ✅ 事件钩子（enter/exit）可用
 - ✅ 不影响现有 v1 代码
 
 #### 应用入口迁移 ✅
+
 **完成日期**：2026-02-28  
 **文件**：
+
 - `src/app/Game.java` - 新主入口类（替代 main.Main）
 - `src/app/GameWindow.java` - 窗口管理
 - `src/adapter/GamePanelAdapter.java` - v1/v2 适配层
 
 **验收标准**：
+
 - ✅ 能启动游戏窗口
 - ✅ 保持现有功能（显示空白窗口）
 - ✅ 编译成功
@@ -189,6 +198,7 @@ java -cp bin main.Main
 ```
 
 **说明**：
+
 - ✅ 新入口 `app.Game` 是主推荐的启动方式
 - 🟡 旧入口 `main.Main` 仍然可用，但不再维护
 - 两者启动效果相同（都显示空白窗口），但新入口为架构扩展预留了接口
