@@ -157,7 +157,7 @@ javac -d bin src/core/event/*.java
 [CORE-1.1] feat: 建立事件系统基础类 (GameEvent, EventBus, EventListener)
 ```
 
-**状态**：⏳ 完成
+**状态**：✅ 完成
 
 ---
 
@@ -326,7 +326,7 @@ public abstract class AbstractGameState implements GameState {
 [CORE-1.2] feat: 实现状态管理系统 (GameState, GameStateManager)
 ```
 
-**状态**：⏳ 完成
+**状态**：✅ 完成
 
 ---
 
@@ -428,7 +428,7 @@ public class ComponentMap {
 [CORE-1.3] feat: 建立组件系统基础 (Component, ComponentType, ComponentMap)
 ```
 
-**状态**：⏳ 待执行
+**状态**：✅ 完成
 
 ---
 
@@ -686,13 +686,26 @@ public class PhysicsManager implements Manager {
 - ✅ 初始化顺序正确（AssetManager → EntityManager → PhysicsManager → RenderManager）
 - ✅ 不影响现有代码
 
+**实施注意事项（2026-02-28）**：
+
+⚠️ **EntityManager 中的暂时注释**：
+
+- `registerEntity()` 方法中有两处代码被注释：
+  1. `entity.setId(id)` - Entity 类暂无 setId() 方法
+  2. 组件索引更新逻辑 - Entity 类暂无 hasComponent() 方法
+- **后续任务需完成**：
+  - 在 Entity 类中添加 `private int id` 字段和 `setId(int id)` 方法
+  - 在 Entity 类中添加 `hasComponent(ComponentType type)` 方法（基于 ComponentMap）
+  - 取消 EntityManager.registerEntity() 中的注释
+- **关联任务**：任务 2.1（Entity 类组件化改造）
+
 **原子化提交**：
 
 ```
 [CORE-1.4] feat: 创建 Manager 框架层 (ServiceRegistry, 5个Manager接口)
 ```
 
-**状态**：⏳ 待执行
+**状态**：✅ 完成
 
 ---
 
@@ -1897,6 +1910,109 @@ PhysicsSystem.update(entity)
 **文件生成时间**：2026-02-28  
 **文件位置**：项目根目录  
 **最后更新**：2026-02-28
+
+---
+
+## 🧪 新架构测试说明
+
+### 测试文件位置
+
+`src/test/NewArchitectureTest.java` - 独立测试类，验证任务 1.1-1.4 的新架构代码
+
+### 测试使用方法
+
+#### 方法 1：命令行运行（推荐）
+
+```bash
+# 进入项目目录
+cd "e:\project software\blue-boy-remake\Blue-Boy-Adventure-origin"
+
+# 编译测试类
+javac -d bin -cp bin src/test/NewArchitectureTest.java
+
+# 运行测试
+java -cp bin test.NewArchitectureTest
+```
+
+#### 方法 2：一键运行
+
+```bash
+# Windows PowerShell
+e:; cd 'e:\project software\blue-boy-remake\Blue-Boy-Adventure-origin'; javac -d bin -cp bin src/test/NewArchitectureTest.java; java -cp bin test.NewArchitectureTest
+```
+
+### 测试覆盖内容
+
+| 测试项 | 测试内容                        | 验证点                                               |
+| ------ | ------------------------------- | ---------------------------------------------------- |
+| 测试 1 | 事件系统（EventBus）            | 单例创建、事件订阅、事件发布、事件清理               |
+| 测试 2 | 状态管理（GameStateManager）    | 单例创建、状态注册、状态切换、状态查询               |
+| 测试 3 | 组件系统（Component）           | ComponentMap 创建、组件添加、获取、移除、生命周期    |
+| 测试 4 | Manager 框架（ServiceRegistry） | 单例创建、Manager 注册、获取、初始化顺序、更新和关闭 |
+
+### 预期输出示例
+
+```
+========================================
+新架构测试开始
+========================================
+
+【测试 1】事件系统（EventBus）
+----------------------------------------
+✓ EventBus 单例创建成功
+✓ 事件监听器订阅成功
+  → 接收到事件: PLAYER_LEVEL_UP (时间戳: 1772277947462)
+✓ 事件发布成功
+✓ EventBus 清理完成
+
+【测试 2】状态管理系统（GameStateManager）
+----------------------------------------
+✓ GameStateManager 单例创建成功
+✓ 状态注册成功
+  → 进入测试状态
+✓ 状态切换成功
+✓ 当前状态: TITLE
+
+【测试 3】组件系统（Component & ComponentMap）
+----------------------------------------
+✓ ComponentMap 创建成功
+  → 组件初始化
+✓ 组件添加成功
+✓ 组件存在检查: true
+✓ 组件获取成功
+  → 组件更新 (deltaTime: 0.016)
+  → 组件销毁
+✓ 组件移除成功
+
+【测试 4】Manager 框架（ServiceRegistry）
+----------------------------------------
+✓ ServiceRegistry 单例创建成功
+✓ 4 个 Manager 注册成功
+✓ AssetManager 获取成功: true
+✓ EntityManager 获取成功: true
+
+初始化所有 Manager（Asset → Entity → Physics → Render）:
+✓ 所有 Manager 初始化成功
+
+测试 Manager 更新:
+✓ Manager 更新测试完成
+✓ 所有 Manager 关闭成功
+
+========================================
+所有测试完成！
+========================================
+```
+
+### 测试状态
+
+- ✅ 所有测试通过（2026-02-28）
+- ✅ 新架构代码工作正常
+- ✅ 与现有游戏代码完全隔离
+- ⏳ 等待后续任务集成到游戏主循环
+
+### 相关文档
+
+详细测试说明请参考：[docs/NEW_ARCHITECTURE_TESTING.md](docs/NEW_ARCHITECTURE_TESTING.md)
 
 ---
 
