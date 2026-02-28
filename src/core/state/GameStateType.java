@@ -8,7 +8,7 @@ public enum GameStateType {
     PLAY,            // 游戏进行中
     PAUSE,           // 游戏暂停
     DIALOGUE,        // 对话中
-    CHARACTER,       // 人物界面
+    CHARACTER,       // 人物界面/背包界面
     OPTION,          // 选项界面
     GAME_OVER,       // 游戏结束
     TRANSITION,      // 过渡

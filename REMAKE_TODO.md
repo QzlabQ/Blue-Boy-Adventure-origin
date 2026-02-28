@@ -157,7 +157,7 @@ javac -d bin src/core/event/*.java
 [CORE-1.1] feat: 建立事件系统基础类 (GameEvent, EventBus, EventListener)
 ```
 
-**状态**：⏳ 待执行
+**状态**：⏳ 完成
 
 ---
 
@@ -326,7 +326,7 @@ public abstract class AbstractGameState implements GameState {
 [CORE-1.2] feat: 实现状态管理系统 (GameState, GameStateManager)
 ```
 
-**状态**：⏳ 待执行
+**状态**：⏳ 完成
 
 ---
 
