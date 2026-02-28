@@ -12,6 +12,7 @@ public class GameStateManager {
     private GameState currentState;
     private GameState previousState;
     private Map<GameStateType, GameState> states = new HashMap<>();
+    private adapter.GamePanelAdapter adapter;
 
     private GameStateManager() {
     }
@@ -108,5 +109,23 @@ public class GameStateManager {
      */
     public GameStateType getCurrentStateType() {
         return currentState != null ? currentState.getStateType() : null;
+    }
+
+    /**
+     * 设置 GamePanelAdapter（用于访问 v1 组件）
+     *
+     * @param adapter GamePanelAdapter 实例
+     */
+    public void setAdapter(adapter.GamePanelAdapter adapter) {
+        this.adapter = adapter;
+    }
+
+    /**
+     * 获取 GamePanelAdapter
+     *
+     * @return GamePanelAdapter 实例
+     */
+    public adapter.GamePanelAdapter getAdapter() {
+        return adapter;
     }
 }
