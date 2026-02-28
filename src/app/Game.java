@@ -50,11 +50,11 @@ public class Game {
         // 6. 显示窗口
         window.show();
 
-        // 7. 创建适配器（预留用于后续集成新框架）
-        adapter = new GamePanelAdapter(gamePanel);
-
-        // 8. 设置游戏
+        // 7. 设置游戏（内部会初始化 v2 适配层）
         gamePanel.setupGame();
+
+        // 8. 复用 GamePanel 中创建的唯一适配器实例，避免双 adapter 并存
+        adapter = gamePanel.adapter;
     }
 
     /**

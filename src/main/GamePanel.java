@@ -1,5 +1,7 @@
 package main;
 
+import adapter.GamePanelAdapter;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -99,6 +101,9 @@ public class GamePanel extends JPanel implements Runnable {
 
     public boolean bossBattleOn = false;
 
+    // v2 适配层
+    public GamePanelAdapter adapter;
+
     // Area
     public int currentArea;
     public int nextArea;
@@ -131,6 +136,16 @@ public class GamePanel extends JPanel implements Runnable {
 
         if (fullScreenOn) {
             setFullScreen();
+        }
+
+        // 初始化新框架（v2）
+        adapter = new GamePanelAdapter(this);
+        try {
+            adapter.initializeNewFramework();
+            System.out.println("[INFO] 新框架 (v2) 初始化成功");
+        } catch (Exception e) {
+            System.err.println("[ERROR] 新框架初始化失败，将使用旧框架 (v1)");
+            e.printStackTrace();
         }
     }
 
