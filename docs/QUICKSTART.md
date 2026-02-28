@@ -37,7 +37,86 @@
 
 ---
 
-## 📚 关键文档
+## 🎯 当前进度
+
+### ✅ 已完成（阶段一）
+
+#### 任务 1.1: 事件系统基础包 ✅
+**完成日期**：2026-02-28  
+**文件**：
+- `src/core/event/GameEvent.java` - 事件基类
+- `src/core/event/GameEventType.java` - 事件类型枚举
+- `src/core/event/EventListener.java` - 监听器接口
+- `src/core/event/EventBus.java` - 事件总线（单例）
+
+**验收标准**：
+- ✅ 编译无错
+- ✅ EventBus 单例正常工作
+- ✅ 订阅/发布机制正常
+- ✅ 不影响现有 v1 代码
+
+#### 任务 1.2: 状态管理系统 ✅
+**完成日期**：2026-02-28  
+**文件**：
+- `src/core/state/GameStateType.java` - 状态类型枚举
+- `src/core/state/GameState.java` - 状态接口
+- `src/core/state/AbstractGameState.java` - 状态抽象基类
+- `src/core/state/GameStateManager.java` - 状态管理器（单例）
+
+**验收标准**：
+- ✅ 编译无错
+- ✅ 状态切换正常
+- ✅ 事件钩子（enter/exit）可用
+- ✅ 不影响现有 v1 代码
+
+#### 应用入口迁移 ✅
+**完成日期**：2026-02-28  
+**文件**：
+- `src/app/Game.java` - 新主入口类（替代 main.Main）
+- `src/app/GameWindow.java` - 窗口管理
+- `src/adapter/GamePanelAdapter.java` - v1/v2 适配层
+
+**验收标准**：
+- ✅ 能启动游戏窗口
+- ✅ 保持现有功能（显示空白窗口）
+- ✅ 编译成功
+- ✅ 原有 v1 代码零改动
+
+### 📊 目录结构
+
+```
+src/
+├── main/                    # v1 (旧代码 - 冻结)
+│   ├── Main.java           # 旧入口 (保留以兼容)
+│   ├── GamePanel.java      # 主游戏面板
+│   └── ... (其他 v1 类)
+│
+├── app/                     # ✨ v2 应用层 (新建)
+│   ├── Game.java           # 新主入口
+│   └── GameWindow.java     # 窗口管理
+│
+├── core/                    # ✨ v2 核心框架 (新建)
+│   ├── event/             # 事件系统
+│   │   ├── GameEvent.java
+│   │   ├── GameEventType.java
+│   │   ├── EventListener.java
+│   │   └── EventBus.java
+│   └── state/             # 状态管理
+│       ├── GameState.java
+│       ├── GameStateType.java
+│       ├── AbstractGameState.java
+│       └── GameStateManager.java
+│
+├── adapter/                 # ✨ v2 适配层 (新建)
+│   └── GamePanelAdapter.java  # v1 <-> v2 桥接
+│
+├── entity/                  # v1 实体系统
+├── tile/                    # v1 地砖系统
+├── data/                    # v1 数据系统
+└── ... (其他 v1 包)
+```
+
+---
 
 ### 1️⃣ 任务清单（REMAKE_TODO.md）
 
@@ -85,6 +164,36 @@
 ---
 
 ## 🎯 我应该做什么？
+
+### 🚀 如何运行游戏
+
+#### 方式一：新入口点（推荐）✨
+
+```bash
+# 编译
+cd e:\project software\blue-boy-remake\Blue-Boy-Adventure-origin
+javac -d bin -cp bin src/ai/*.java src/data/*.java src/entity/*.java \
+  src/environment/*.java src/main/*.java src/maptool/*.java src/monster/*.java \
+  src/object/*.java src/tile/*.java src/tile_interactive/*.java \
+  src/core/event/*.java src/core/state/*.java src/adapter/*.java src/app/*.java
+
+# 运行（新入口）
+java -cp bin app.Game
+```
+
+#### 方式二：旧入口点（仅兼容）
+
+```bash
+# 运行（旧入口）
+java -cp bin main.Main
+```
+
+**说明**：
+- ✅ 新入口 `app.Game` 是主推荐的启动方式
+- 🟡 旧入口 `main.Main` 仍然可用，但不再维护
+- 两者启动效果相同（都显示空白窗口），但新入口为架构扩展预留了接口
+
+---
 
 ### 如果你是开发人员
 
