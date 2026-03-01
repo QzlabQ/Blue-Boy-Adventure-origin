@@ -1,3 +1,5 @@
+package test;
+
 import core.event.*;
 import core.state.*;
 import core.state.impl.*;
