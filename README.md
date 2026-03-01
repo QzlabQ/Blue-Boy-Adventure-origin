@@ -91,19 +91,31 @@
 
 本项目正在进行大规模的架构重构（v1 → v2），目标是提升代码质量、可维护性和可扩展性。
 
+### 🎯 重构进度
+
+**第一阶段：框架搭建** ✅ **已完成（2026-03-01）**
+
+- ✅ 事件系统基础包 (CORE-1.1)
+- ✅ 状态管理系统 (CORE-1.2)
+- ✅ 组件系统基础 (CORE-1.3)
+- ✅ Manager 框架层 (CORE-1.4)
+- ✅ 具体状态类 (CORE-1.5, 1.6)
+- ✅ Adapter 适配层 (CORE-1.7)
+- ✅ 集成测试+文档 (CORE-1.8)
+
+**进度统计**：
+- 新增 31 个 Java 类
+- 新增 ~2500 行代码
+- 创建 5 个新包结构
+- 修改 2 个现有类（最小化改动）
+- 编译通过 ✅ | 运行验证 ✅ | 集成测试 21/21 通过 ✅
+
 ### 重构相关文档
 
-- 📋 **[REMAKE_TODO.md](REMAKE_TODO.md)** - 详细的任务清单和执行步骤
-  - 第一阶段：框架搭建（12 天，~2-3 周）
-  - 第二阶段：系统迁移（23 天，~3-4 周）
-  - 第三阶段：深度优化（12 天，~2-3 周）
-
-- 📖 **[ARCHITECTURE_v2.md](ARCHITECTURE_v2.md)** - 新架构设计文档
-  - 核心问题分析
-  - 解决方案设计
-  - 架构层次和类图
-  - 设计模式说明
-  - 状态转换流程
+- 📋 **[REMAKE_TODO.md](REMAKE_TODO.md)** - 详细的任务清单和执行步骤（实时更新）
+- 📊 **[docs/PHASE1_SUMMARY.md](docs/PHASE1_SUMMARY.md)** - 第一阶段完成总结报告
+- 📖 **[ARCHITECTURE_v2.md](ARCHITECTURE_v2.md)** - 新架构详细设计文档
+- 🧪 **[src/test/FrameworkTest.java](src/test/FrameworkTest.java)** - 框架集成测试（21 个测试用例）
 
 ### 重构目标
 
@@ -114,14 +126,32 @@
 
 ### 核心改进指标
 
-| 指标             | v1  | v2  | 改进  |
-| ---------------- | --- | --- | ----- |
-| GamePanel 字段数 | 56  | 1   | ↓ 98% |
-| Entity 字段数    | 58  | 3   | ↓ 95% |
-| 代码耦合度       | 高  | 低  | ↓ 70% |
+| 指标             | v1  | v2  | 改进     |
+| ---------------- | --- | --- | -------- |
+| GamePanel 字段数 | 56  | 1   | ↓ 98%    |
+| Entity 字段数    | 58  | 3   | ↓ 95%    |
+| 代码耦合度       | 高  | 低  | ↓ 70%    |
+| 状态管理         | 魔数 | 枚举+类型安全 | ✅ |
+| 事件驱动         | ❌ 无 | ✅ EventBus | ✅ |
+| 组件化           | ❌ 无 | ✅ ComponentMap | ✅ |
+
+### 运行集成测试
+
+```bash
+# 编译测试文件
+javac -encoding UTF-8 -d bin -cp bin src/test/FrameworkTest.java
+
+# 运行测试
+java -cp bin FrameworkTest
+
+# 预期结果：✅ 所有测试通过！第一阶段框架完全可用。
+```
 
 ### 快速开始
 
-欲了解重构进展和具体任务分配，请参考 [REMAKE_TODO.md](REMAKE_TODO.md)。
+欲了解重构进展和具体任务分配，请参考：
+- 实时进度：[REMAKE_TODO.md](REMAKE_TODO.md)
+- 完成报告：[docs/PHASE1_SUMMARY.md](docs/PHASE1_SUMMARY.md)
+- 架构设计：[ARCHITECTURE_v2.md](ARCHITECTURE_v2.md)
 
 祝您开发愉快！ 🚀
