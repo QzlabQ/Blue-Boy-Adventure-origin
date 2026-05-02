@@ -444,7 +444,10 @@ public class KeyHandler implements KeyListener {
             shotKeyPressed = false;
         }
         if (code == KeyEvent.VK_ENTER) {
-            enterPressed = false;
+            // In cutscenes, let the cutscene logic consume ENTER to avoid missing quick taps.
+            if (gp.gameState != gp.cutsceneState) {
+                enterPressed = false;
+            }
         }
         if (code == KeyEvent.VK_SPACE) {
             spacePressed = false;
