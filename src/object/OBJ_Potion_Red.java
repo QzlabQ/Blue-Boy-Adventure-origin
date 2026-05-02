@@ -7,6 +7,11 @@ public class OBJ_Potion_Red extends Entity {
     public static final String objName = "Red Potion";
     GamePanel gp;
 
+    public void setDialogue() {
+        dialogues[0][0] = "You drink the " + name + "!\n"
+                + "Your life has been recovered by " + value + ".";
+    }
+
     public OBJ_Potion_Red(GamePanel gp) {
         super(gp);
 
@@ -19,13 +24,14 @@ public class OBJ_Potion_Red extends Entity {
         description = "[Red Potion]\nHeals your life by " + value + ".";
         price = 20;
         stackable = true;
+
+        setDialogue();
     }
 
     public boolean use(Entity entity) {
 
         gp.gameState = gp.dialogueState;
-        gp.ui.currentDialogue = "You drink the " + name + "!\n"
-                + "Your life has been recovered by " + value + ".";
+        startDialogue(this, 0);
         entity.life += value;
         if (gp.player.life > gp.player.maxLife) {
             gp.player.life = gp.player.maxLife;

@@ -21,7 +21,8 @@ public class Entity {
     public Rectangle solidArea = new Rectangle(0, 0, 48, 48);// DEFAULT, YOU CAN REWRITE IT IN EACH SPECIFIC CLASS
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
-    public String dialogues[] = new String[20];
+    public String dialogues[][] = new String[20][20];
+    public int dialogueSet = 0;
     public Entity attacker;
     public BufferedImage image, image2, image3;
     public Entity linkedEntity;
@@ -214,13 +215,7 @@ public class Entity {
     public void damageReaction() {
     }
 
-    public void speak() {
-
-        if (dialogues[dialogueIndex] == null) {
-            dialogueIndex = 0;// loop
-        }
-        gp.ui.currentDialogue = dialogues[dialogueIndex];
-        dialogueIndex++;
+    public void facePlayer() {
 
         switch (gp.player.direction) {
             case "up":
@@ -238,8 +233,16 @@ public class Entity {
         }
     }
 
+    public void speak() {}
+
     public void interact() {
 
+    }
+
+    public void startDialogue(Entity entity, int setNum) {
+        gp.gameState = gp.dialogueState;
+        gp.ui.npc = entity;
+        entity.dialogueSet = setNum;
     }
 
     public boolean use(Entity entity) {

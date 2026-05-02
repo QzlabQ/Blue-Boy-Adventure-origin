@@ -33,6 +33,8 @@ public class UI {
     public int npcSlotRow = 0;
     int subState = 0;
     int counter = 0;
+    int charIndex = 0;
+    String combineString = "";
     public Entity npc;
 
     public UI(GamePanel gp) {
@@ -320,6 +322,35 @@ public class UI {
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 32F));
         x += gp.tileSize;
         y += gp.tileSize;
+
+        if(npc.dialogues[npc.dialogueSet][npc.dialogueIndex] != null){
+            // currentDialogue = npc.dialogues[npc.dialogueSet][npc.dialogueIndex];
+
+            char characters[] = npc.dialogues[npc.dialogueSet][npc.dialogueIndex].toCharArray();
+
+            if (charIndex < characters.length) {
+                gp.playSE(17);
+                combineString += characters[charIndex];
+                currentDialogue = combineString;
+                charIndex++;
+            }
+            
+            if(gp.keyH.enterPressed){
+                charIndex = 0;
+                combineString = "";
+                if(gp.gameState == gp.dialogueState){
+                    npc.dialogueIndex++;
+                    gp.keyH.enterPressed = false;
+                }
+            }
+        }
+        else{
+            npc.dialogueIndex = 0;
+
+            if(gp.gameState == gp.dialogueState){
+                gp.gameState = gp.playState;
+            }
+        }
 
         for (String line : currentDialogue.split("\n")) {
             g2.drawString(line, x, y);
@@ -857,6 +888,8 @@ public class UI {
     }
 
     public void trade_select() {
+
+        npc.dialogueSet = 0;
         drawDialogueScreen();
 
         // draw window
@@ -890,8 +923,8 @@ public class UI {
             g2.drawString(">", x - 24, y);
             if (gp.keyH.enterPressed) {
                 commandNum = 0;
+                npc.startDialogue(npc, 1);
                 gp.gameState = gp.dialogueState;
-                currentDialogue = "Come again, hehe!";
             }
         }
         y += gp.tileSize;
@@ -939,16 +972,16 @@ public class UI {
         if (gp.keyH.enterPressed && itemIndex < npc.inventory.size()) {
             if (npc.inventory.get(itemIndex).price > gp.player.coin) {
                 subState = 0;
-                gp.gameState = gp.dialogueState;
-                currentDialogue = "You need more coins to buy that!";
-                drawDialogueScreen();
+                npc.startDialogue(npc, 2);
+                // currentDialogue = "You need more coins to buy that!";
             } else {
                 if (gp.player.canObtainItem(npc.inventory.get(itemIndex))) {
                     gp.player.coin -= npc.inventory.get(itemIndex).price;
                 } else {
                     subState = 0;
-                    gp.gameState = gp.dialogueState;
-                    currentDialogue = "You cannot carry anymore!";
+                    npc.startDialogue(npc, 3);
+                    // gp.gameState = gp.dialogueState;
+                    // currentDialogue = "You cannot carry anymore!";
                 }
             }
         }
@@ -1000,8 +1033,9 @@ public class UI {
                         || gp.player.inventory.get(itemIndex) == gp.player.currentShield) {
                     commandNum = 0;
                     subState = 0;
-                    gp.gameState = gp.dialogueState;
-                    currentDialogue = "You cannot sell an equipped item!";
+                    npc.startDialogue(npc, 4);
+                    // gp.gameState = gp.dialogueState;
+                    // currentDialogue = "You cannot sell an equipped item!";
                 } else {
                     if (gp.player.inventory.get(itemIndex).amount > 1) {
                         gp.player.inventory.get(itemIndex).amount--;

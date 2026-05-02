@@ -21,6 +21,8 @@ public class NPC_OldMan extends Entity {
         solidArea.width = 30;
         solidArea.height = 30;
 
+        dialogueSet = -1;
+
         getImage();
         setDialogue();
     }
@@ -40,10 +42,16 @@ public class NPC_OldMan extends Entity {
 
     public void setDialogue() {
 
-        dialogues[0] = "Hello, blue cat of software college";
-        dialogues[1] = "So you've come to this island \n to finish your LaoYu?";
-        dialogues[2] = "I used to be a great student of 6th \ndepartment but now... I'm a bit too \nold for taking a LaoYu.";
-        dialogues[3] = "Well, good luck on you";
+        dialogues[0][0] = "Hello, blue cat of software college";
+        dialogues[0][1] = "So you've come to this island \n to finish your LaoYu?";
+        dialogues[0][2] = "I used to be a great student of 6th \ndepartment but now... I'm a bit too \nold for taking a LaoYu.";
+        dialogues[0][3] = "Well, good luck on you";
+
+        dialogues[1][0] = "If you are tired, you can rest by the water.";
+        dialogues[1][1] = "However, everytime you rest, monsters will reappear.";
+        dialogues[1][2] = "So be careful when you want to rest.";
+
+        dialogues[2][0] = "I wonder how to open that door... \n maybe you can find some clues around the island.";
 
     }
 
@@ -85,8 +93,15 @@ public class NPC_OldMan extends Entity {
 
         // Do this character specific stuff
 
-        super.speak();
+        facePlayer();
+        startDialogue(this, dialogueSet);
 
+        dialogueSet++;
+
+        if(dialogues[dialogueSet][0] == null) {
+            // dialogueSet = 0;
+            dialogueSet--;
+        }
         // onPath = true;
     }
 

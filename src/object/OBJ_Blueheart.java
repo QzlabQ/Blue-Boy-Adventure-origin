@@ -15,8 +15,8 @@ public class OBJ_Blueheart extends Entity{
         setDialogues();
     }
     public void setDialogues(){
-        dialogues[0] = "You picked up a beautiful blue gem.";
-        dialogues[0] = "You find the Blue Heart, the legendary treasure!";
+        dialogues[0][0] = "You picked up a beautiful blue gem.";
+        dialogues[1][0] = "You find the Blue Heart, the legendary treasure!";
     }
     public boolean use(Entity entity){
         gp.gameState = gp.cutsceneState;

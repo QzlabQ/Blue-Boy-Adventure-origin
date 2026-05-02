@@ -44,7 +44,7 @@ public class Player extends Entity {
 
         setDefaultValue();
     }
-
+    
     public void setDefaultValue() {
         worldX = gp.tileSize * 23;
         worldY = gp.tileSize * 21;
@@ -140,6 +140,11 @@ public class Player extends Entity {
             }
         }
         return currentShieldSlot;
+    }
+
+    public void setDialogue() {
+                    dialogues[0][0] = "You are level " + level + " now!\n"
+                    + "You feel stronger!";
     }
 
     public void getImage() {
@@ -441,9 +446,8 @@ public class Player extends Entity {
                 if (gp.npc[gp.currentMap][i] instanceof NPC_BigRock) {
                     // gp.npc[gp.currentMap][i].move(direction);
                 } else {
-                    gp.gameState = gp.dialogueState;
                     gp.npc[gp.currentMap][i].speak();
-                    gp.playSE(7);
+                    // gp.playSE(7);
                 }
             }
             // gp.npc[gp.currentMap][i].move(direction);
@@ -549,8 +553,8 @@ public class Player extends Entity {
 
             gp.playSE(8);
             gp.gameState = gp.dialogueState;
-            gp.ui.currentDialogue = "You are level " + level + " now!\n"
-                    + "You feel stronger!";
+
+            startDialogue(this, 0);
         }
     }
 
