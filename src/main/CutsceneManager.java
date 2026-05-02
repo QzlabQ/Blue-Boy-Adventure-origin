@@ -109,11 +109,8 @@ public class CutsceneManager {
                 if (gp.monster[gp.currentMap][i] != null &&
                         MON_SkeletonLord.monName.equals(gp.monster[gp.currentMap][i].name)) {
 
-                    
-                    
                     gp.ui.npc = gp.monster[gp.currentMap][i];
                     scenePhase++;
-                    gp.ui.npc.speak(); 
                     break;
                 }
             }
@@ -121,27 +118,19 @@ public class CutsceneManager {
 
         
         if (scenePhase == 3) {
-            
-            
-            gp.ui.drawDialogueScreen();
-
-            
-            if (gp.keyH.enterPressed) {
-                String nextLine = gp.ui.npc.dialogues[gp.ui.npc.dialogueIndex];
-                if (nextLine == null) {
-                    scenePhase++;
-                    gp.ui.npc.dialogueIndex = 0;
-                } else {
-                    gp.ui.npc.speak();
-                }
-                gp.keyH.enterPressed = false;
+            if (gp.ui.npc.dialogues[gp.ui.npc.dialogueSet][gp.ui.npc.dialogueIndex] == null) {
+                gp.ui.npc.dialogueIndex = 0;
+                gp.ui.currentDialogue = "";
+                scenePhase++;
+                return;
             }
+
+            gp.gameState = gp.dialogueState;
+            gp.ui.drawDialogueScreen();
         }
 
         
         if (scenePhase == 4) {
-            
-            gp.gameState = gp.playState;
 
             
             for (int i = 0; i < gp.monster[1].length; i++) {
@@ -171,6 +160,7 @@ public class CutsceneManager {
             sceneNum = NA;
             scenePhase = 0;
             gp.csManager.sceneNum = gp.csManager.NA;
+            gp.gameState = gp.playState;
 
             
             gp.stopMusic();
@@ -199,7 +189,7 @@ public class CutsceneManager {
             if(gp.keyH.enterPressed){
                 
                 
-                if(gp.ui.npc.dialogues[gp.ui.npc.dialogueIndex] != null){
+                if(gp.ui.npc.dialogues[gp.ui.npc.dialogueSet][gp.ui.npc.dialogueIndex] != null){
                      gp.ui.npc.speak();
                 } else {
                      scenePhase++; 
