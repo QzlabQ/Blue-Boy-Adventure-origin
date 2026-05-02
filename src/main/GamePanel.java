@@ -98,6 +98,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int debugState = 12;
 
     public boolean bossBattleOn = false;
+    public volatile boolean retryingFromGameOver = false;
 
     // Area
     public int currentArea;
@@ -105,6 +106,10 @@ public class GamePanel extends JPanel implements Runnable {
     public final int outside = 50;
     public final int indoor = 51;
     public final int dungeon = 52;
+    public int respawnMap = 0;
+    public int respawnWorldX = tileSize * 23;
+    public int respawnWorldY = tileSize * 21;
+    public int respawnArea = outside;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -135,10 +140,20 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void resetGame(boolean restart) {
-        currentArea = outside;
         removeTempEntity();
         bossBattleOn = false;
-        player.setDefaultPositions();
+        if (restart == true) {
+            currentArea = outside;
+            nextArea = outside;
+            setRespawnTile(0, 23, 21, outside);
+            player.setDefaultPositions();
+        } else {
+            currentMap = respawnMap;
+            currentArea = respawnArea;
+            nextArea = respawnArea;
+            player.worldX = respawnWorldX;
+            player.worldY = respawnWorldY;
+        }
         player.restoreStatus();
         aSetter.setMonster();
         aSetter.setNPC();
@@ -150,6 +165,17 @@ public class GamePanel extends JPanel implements Runnable {
             eManager.lighting.resetDay();
             Progress.skeletonLordDefeated = false;
         }
+    }
+
+    public void setRespawnTile(int map, int col, int row, int area) {
+        setRespawnPoint(map, col * tileSize, row * tileSize, area);
+    }
+
+    public void setRespawnPoint(int map, int worldX, int worldY, int area) {
+        respawnMap = map;
+        respawnWorldX = worldX;
+        respawnWorldY = worldY;
+        respawnArea = area;
     }
 
     public void setFullScreen() {
@@ -266,6 +292,10 @@ public class GamePanel extends JPanel implements Runnable {
         // clear screen
         g2.setColor(Color.black);
         g2.fillRect(0, 0, screenWidth, screenHeight);
+
+        if (retryingFromGameOver == true) {
+            return;
+        }
 
         // DEBUG
         long drawStart = 0;

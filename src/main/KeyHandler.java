@@ -95,9 +95,14 @@ public class KeyHandler implements KeyListener {
             }
             if (gp.ui.commandNum == 1) {
                 gp.saveLoad.load();
-                ;
                 gp.gameState = gp.playState;
-                gp.playMusic(0);
+                if (gp.currentArea == gp.dungeon) {
+                    gp.playMusic(19);
+                } else if (gp.currentArea == gp.indoor) {
+                    gp.playMusic(18);
+                } else {
+                    gp.playMusic(0);
+                }
             }
             if (gp.ui.commandNum == 2) {
                 System.exit(0);
@@ -336,10 +341,17 @@ public class KeyHandler implements KeyListener {
         }
         if (code == KeyEvent.VK_ENTER) {
             if (gp.ui.commandNum == 0) {
-                gp.gameState = gp.playState;
+                gp.retryingFromGameOver = true;
                 gp.resetGame(false);
-                // gp.stopMusic();
-                gp.playMusic(0);
+                gp.gameState = gp.playState;
+                gp.retryingFromGameOver = false;
+                if (gp.currentArea == gp.dungeon) {
+                    gp.playMusic(19);
+                } else if (gp.currentArea == gp.indoor) {
+                    gp.playMusic(18);
+                } else {
+                    gp.playMusic(0);
+                }
             } else if (gp.ui.commandNum == 1) {
                 gp.ui.titleScreenState = 0;
                 gp.gameState = gp.titleState;

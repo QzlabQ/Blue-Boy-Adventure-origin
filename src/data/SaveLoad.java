@@ -11,6 +11,7 @@ import main.GamePanel;
 import object.OBJ_Axe;
 import object.OBJ_Boots;
 import object.OBJ_Chest;
+import object.OBJ_CheckpointMarker;
 import object.OBJ_Coin_Bronze;
 import object.OBJ_Door;
 import object.OBJ_Door_Iron;
@@ -69,6 +70,9 @@ public class SaveLoad {
             case "Chest":
                 obj = new OBJ_Chest(gp);
                 break;
+            case "Checkpoint Marker":
+                obj = new OBJ_CheckpointMarker(gp);
+                break;
             case "Bronze Coin":
                 obj = new OBJ_Coin_Bronze(gp);
                 break;
@@ -107,6 +111,12 @@ public class SaveLoad {
             ds.nextLevelExp = gp.player.nextLevelExp;
             ds.dexterity = gp.player.dexterity;
             ds.coin = gp.player.coin;
+
+            // respawn point
+            ds.respawnMap = gp.respawnMap;
+            ds.respawnWorldX = gp.respawnWorldX;
+            ds.respawnWorldY = gp.respawnWorldY;
+            ds.respawnArea = gp.respawnArea;
 
             // inventory
             for (int i = 0; i < gp.player.inventory.size(); i++) {
@@ -162,6 +172,15 @@ public class SaveLoad {
             gp.player.exp = ds.exp;
             gp.player.nextLevelExp = ds.nextLevelExp;
             gp.player.coin = ds.coin;
+
+            if (ds.respawnWorldX != 0 || ds.respawnWorldY != 0) {
+                gp.setRespawnPoint(ds.respawnMap, ds.respawnWorldX, ds.respawnWorldY, ds.respawnArea);
+                gp.currentMap = gp.respawnMap;
+                gp.currentArea = gp.respawnArea;
+                gp.nextArea = gp.respawnArea;
+                gp.player.worldX = gp.respawnWorldX;
+                gp.player.worldY = gp.respawnWorldY;
+            }
 
             // 读取背包
             gp.player.inventory.clear();

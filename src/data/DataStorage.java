@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class DataStorage implements Serializable {
+    private static final long serialVersionUID = 6412795632171837903L;
+
     // PlayerStatus
     int level;
     int maxLife;
@@ -15,6 +17,12 @@ public class DataStorage implements Serializable {
     int exp;
     int nextLevelExp;
     int coin;
+
+    // respawn point
+    int respawnMap;
+    int respawnWorldX;
+    int respawnWorldY;
+    int respawnArea;
 
     // inventory
     ArrayList<String> itemNames = new ArrayList<>();

@@ -80,7 +80,7 @@ public class EventHandler {
                 teleport(3, 26, 41, gp.dungeon); // 01 传送到dungeon02
             } else if (hit(3, 26, 41, "any") == true) {
                 teleport(2, 8, 7, gp.dungeon); // 02 传送到dungeon01
-            } else if (hit(3, 27, 41, "up") == true) {
+            } else if (hit(3, 27, 41, "any") == true) {
                 bossCheckpoint(gp.dialogueState);
             } else if (hit(3, 25, 27, "any") == true) {
                 skeletonLord();
@@ -153,6 +153,7 @@ public class EventHandler {
             gp.playSE(2);
             gp.ui.currentDialogue = "Checkpoint activated.\nYour life and mana have been recovered.\n"
                     + "(The progress has been saved)";
+            gp.setRespawnTile(3, 27, 41, gp.dungeon);
             gp.player.life = gp.player.maxLife;
             gp.player.mana = gp.player.maxMana;
             gp.saveLoad.save();
