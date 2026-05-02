@@ -226,7 +226,19 @@ public class KeyHandler implements KeyListener {
 
     public void dialogueState(int code) {
         if (code == KeyEvent.VK_ENTER) {
-            gp.gameState = gp.playState;
+            // If an NPC dialogue is active, keep advancing lines until it ends.
+            if (gp.ui.npc != null) {
+                if (gp.ui.npc.dialogues[gp.ui.npc.dialogueIndex] != null) {
+                    gp.ui.npc.speak();
+                } else {
+                    gp.ui.npc.dialogueIndex = 0;
+                    gp.ui.npc = null;
+                    gp.gameState = gp.playState;
+                }
+            } else {
+                // System dialogue (level-up, hints, etc.)
+                gp.gameState = gp.playState;
+            }
         }
     }
 
@@ -444,7 +456,10 @@ public class KeyHandler implements KeyListener {
             shotKeyPressed = false;
         }
         if (code == KeyEvent.VK_ENTER) {
-            enterPressed = false;
+            // In cutscenes, let the cutscene logic consume ENTER to avoid missing quick taps.
+            if (gp.gameState != gp.cutsceneState) {
+                enterPressed = false;
+            }
         }
         if (code == KeyEvent.VK_SPACE) {
             spacePressed = false;

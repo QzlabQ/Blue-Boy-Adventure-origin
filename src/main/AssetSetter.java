@@ -233,6 +233,8 @@ public class AssetSetter {
                     return new OBJ_AirWall(gp);
                 case "OBJ_Chest":
                     return new OBJ_Chest(gp);
+                case "OBJ_CheckpointMarker":
+                    return new OBJ_CheckpointMarker(gp);
                 case "OBJ_Axe":
                     return new OBJ_Axe(gp);
                 case "OBJ_Coin_Bronze":

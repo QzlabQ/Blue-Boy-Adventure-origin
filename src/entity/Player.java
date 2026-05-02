@@ -563,10 +563,10 @@ public class Player extends Entity {
 
             if (selectedItem.type == type_boots) {
                 if (currentBoots == selectedItem) {
-                    speed -= 2;
+                    speed = defaultSpeed;
                     currentBoots = null;
                 } else {
-                    speed += 2;
+                    speed += defaultSpeed+4;
                     currentBoots = selectedItem;
                 }
 

@@ -80,6 +80,8 @@ public class EventHandler {
                 teleport(3, 26, 41, gp.dungeon); // 01 传送到dungeon02
             } else if (hit(3, 26, 41, "any") == true) {
                 teleport(2, 8, 7, gp.dungeon); // 02 传送到dungeon01
+            } else if (hit(3, 27, 41, "up") == true) {
+                bossCheckpoint(gp.dialogueState);
             } else if (hit(3, 25, 27, "any") == true) {
                 skeletonLord();
             }
@@ -142,6 +144,20 @@ public class EventHandler {
             gp.saveLoad.save();
         }
 
+    }
+
+    public void bossCheckpoint(int gameState) {
+        if (gp.keyH.enterPressed == true) {
+            gp.gameState = gameState;
+            gp.player.attackCanceled = true;
+            gp.playSE(2);
+            gp.ui.currentDialogue = "Checkpoint activated.\nYour life and mana have been recovered.\n"
+                    + "(The progress has been saved)";
+            gp.player.life = gp.player.maxLife;
+            gp.player.mana = gp.player.maxMana;
+            gp.saveLoad.save();
+            canTouchEvent = false;
+        }
     }
 
     public void teleport(int map, int col, int row, int area) {
